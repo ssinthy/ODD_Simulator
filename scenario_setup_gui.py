@@ -5,7 +5,7 @@ from setup_carla import *
 # Initialize the main window
 root = tk.Tk()
 root.title("ScenarioInfoManager")
-root.geometry("600x500")  # Set the window size
+root.geometry("600x400")  # Set the window size
 
 # Default values for each field
 default_values = {
@@ -29,6 +29,10 @@ emv_direction_options = ["Approaches from Behind", "As Lead Vehicle", "Approache
                          "Approaches Intersection"]
 weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain"]
 time_of_day_options = ["Day time", "Night time"]
+
+spectator_spawn_point = 176
+ego_spawn_point = 21
+emv_spawn_point = 176
     
 def map_scenario_for_motorway(scenario_info):
     if scenario_info["ego_vehicle_position"] == "Traffic Lane":
@@ -37,9 +41,6 @@ def map_scenario_for_motorway(scenario_info):
         pass
     elif scenario_info["ego_vehicle_position"] == "Approaching T-Junction":
         pass
-    
-def map_scenario_for_expressway():
-    pass
         
 
 # Function to handle the Start Simulation button click
@@ -47,11 +48,11 @@ def start_simulation():
     
     connect_to_carla()
     
-    spawn_ego_vehicle()
+    spawn_ego_vehicle(ego_spawn_point)
     
-    spawn_emergency_vehicle()
+    spawn_emergency_vehicle(emv_spawn_point)
     
-    set_spectator()
+    set_spectator(spectator_spawn_point)
 
 # Function to handle the Set Up Scenario button click
 def setup_scenario():
@@ -59,16 +60,6 @@ def setup_scenario():
     # map_user_input_to_carla_map(scenario_info)
     change_ego_vehicle_spawn_point(200)
     change_emv_vehicle_spawn_point(22)
-    
-# Function to handle value changes in comboboxes
-def on_combobox_road_type_change(event):
-    current_value = event.widget.get()  
-    if current_value != scenario_info["road_type"]:
-        scenario_info["road_type"] = current_value
-        if scenario_info["road_type"] == "Expressway":
-            map_scenario_for_expressway()
-        elif scenario_info["road_type"] == "Motorway":
-            map_scenario_for_motorway()
             
 # Function to handle value changes in comboboxes
 def on_combobox_change(event, combobox_name):
@@ -85,7 +76,7 @@ ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20
 road_type_cb = ttk.Combobox(root, values=road_type_options, state="readonly", font=large_font)
 road_type_cb.set(default_values["road_type"])
 road_type_cb.grid(row=0, column=1, padx=20, pady=10)
-road_type_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_road_type_change(event))
+road_type_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_change(event, "road_type"))
 
 ttk.Label(root, text="Ego Vehicle Position", font=large_font).grid(row=1, column=0, padx=20, pady=10, sticky=tk.W)
 ego_vehicle_position_cb = ttk.Combobox(root, values=ego_vehicle_position_options, state="readonly", font=large_font)
@@ -124,8 +115,9 @@ safety_distance_sb.grid(row=6, column=1, padx=20, pady=10)
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
 start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10, ipady=5)
 
+'''
 setup_button = ttk.Button(root, text="Set Up Scenario", command=setup_scenario, style='TButton')
 setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10, ipady=5)
-
+'''
 # Start the main event loop
 root.mainloop()
