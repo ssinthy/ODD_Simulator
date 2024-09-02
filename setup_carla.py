@@ -12,7 +12,7 @@ def connect_to_carla():
     world = client.load_world("Town05")
 
 # TODO Separate ego vehicle and emv spawning
-def spawn_ego_vehicle(ego_spawn_point):
+def spawn_ego_vehicle(ego_spawn_point = 21):
     global global_ego_vehicle, world
     # Spawn an emergency vehicle town 5 spawn point 108 / HH map 154
     spawn_points = world.get_map().get_spawn_points()
@@ -20,7 +20,7 @@ def spawn_ego_vehicle(ego_spawn_point):
     global_ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[ego_spawn_point])
     global_ego_vehicle.set_autopilot(True)
     
-def spawn_emergency_vehicle(emv_spawn_point):
+def spawn_emergency_vehicle(emv_spawn_point = 176):
     global global_emv_vehicle, world, client
     spawn_points = world.get_map().get_spawn_points()
     
@@ -41,6 +41,15 @@ def spawn_emergency_vehicle(emv_spawn_point):
         
     global_emv_vehicle.set_autopilot(True, traffic_manager_port)
     
+def set_spectator(spectator_spawn_point = 176):
+    spawn_points = world.get_map().get_spawn_points()
+    spectator = world.get_spectator()
+    spawn_point_motor_way = spawn_points[spectator_spawn_point]
+    
+    spectator_pos_motorway = carla.Transform(spawn_point_motor_way.location + carla.Location(x=20,z=8),
+                        carla.Rotation(yaw = spawn_point_motor_way.rotation.yaw))
+    spectator.set_transform(spectator_pos_motorway) 
+    
 def change_ego_vehicle_spawn_point(ego_spawn_point):
     global global_ego_vehicle
     
@@ -54,12 +63,3 @@ def change_emv_vehicle_spawn_point(emv_spawn_point):
     global_emv_vehicle.destroy()
     
     spawn_emergency_vehicle(emv_spawn_point)
-    
-def set_spectator(spectator_spawn_point):
-    spawn_points = world.get_map().get_spawn_points()
-    spectator = world.get_spectator()
-    spawn_point_motor_way = spawn_points[spectator_spawn_point]
-    
-    spectator_pos_motorway = carla.Transform(spawn_point_motor_way.location + carla.Location(x=20,z=8),
-                        carla.Rotation(yaw = spawn_point_motor_way.rotation.yaw))
-    spectator.set_transform(spectator_pos_motorway)       
