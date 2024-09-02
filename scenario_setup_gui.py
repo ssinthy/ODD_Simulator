@@ -24,24 +24,16 @@ default_values = {
 }
 
 # Dictionary to store previous values of comboboxes and spinbox
-previous_values = default_values.copy()
+scenario_info = default_values.copy()
 
 # Define the options for each combobox
 road_type_options = ["Motorway", "Expressway"]
-ego_vehicle_position_options = ["Traffic Lane", "Approaching Intersection", "Approaching T-Junction"]
+ego_vehicle_position_options = ["Traffic Lane", "Approaching Intersection"]
 emv_position_options = ["Same Road", "Parallel Road", "Opposite Road", "Cross Road"]
 emv_direction_options = ["Approaches from Behind", "As Lead Vehicle", "Approaches from Right Lane", "Approaches from Left Lane", "Approaches on Opposite Lane", 
-                         "Approaches Intersection", "Approaches T-Junction"]
+                         "Approaches Intersection"]
 weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain"]
 time_of_day_options = ["Day time", "Night time"]
-
-# Function to handle value changes in comboboxes
-def on_combobox_change(event, combobox_name):
-    current_value = event.widget.get()  # Get the current value of the combobox
-    if current_value != previous_values[combobox_name]:
-        print(f"{combobox_name} changed to {current_value}")
-        previous_values[combobox_name] = current_value  # Update the stored value
-
 
 def connect_to_carla():
     global world, client
@@ -51,21 +43,15 @@ def connect_to_carla():
 
 # TODO Separate ego vehicle and emv spawning
 def spawn_ego_vehicle(ego_spawn_point = 21):
-    global global_ego_vehicle, world, client
+    global global_ego_vehicle, world
     # Spawn an emergency vehicle town 5 spawn point 108 / HH map 154
     spawn_points = world.get_map().get_spawn_points()
     vehicle_bp = world.get_blueprint_library().find('vehicle.audi.etron')
     global_ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[ego_spawn_point])
-    
-    # Set spectator manual navigation
-    spectator = world.get_spectator()
-    transform = carla.Transform(global_ego_vehicle.get_transform().transform(carla.Location(x=-20, y= 0, z=5)), global_ego_vehicle.get_transform().rotation)
-    spectator.set_transform(transform)
-   
     global_ego_vehicle.set_autopilot(True)
     
 def spawn_emergency_vehicle(emv_spawn_point = 176):
-    global global_ego_vehicle, global_emv_vehicle, world, client
+    global global_emv_vehicle, world, client
     spawn_points = world.get_map().get_spawn_points()
     
     emergency_bp = world.get_blueprint_library().find('vehicle.carlamotors.firetruck')
@@ -94,18 +80,30 @@ def change_vehicle_spawn_point(ego_spawn_point, emv_spawn_point):
     spawn_ego_vehicle(ego_spawn_point)
     spawn_emergency_vehicle(emv_spawn_point)
     
-def map_user_input_to_carla_map(scenario_info):
+def map_scenario_for_motorway(scenario_info):
+    if scenario_info["ego_vehicle_position"] == "Traffic Lane":
+        pass
+    elif scenario_info["ego_vehicle_position"] == "Approaching Intersection":
+        pass
+    elif scenario_info["ego_vehicle_position"] == "Approaching T-Junction":
+        pass
     
+def map_scenario_for_expressway():
+    pass
+        
+def set_spectator():
+    spawn_points = world.get_map().get_spawn_points()
+    spectator = world.get_spectator()
+    spawn_point_motor_way = spawn_points[176]
+        
     if scenario_info["road_type"] == "Motorway":
-        if scenario_info["ego_vehicle_position"] == "Traffic Lane":
-            pass
-        elif scenario_info["ego_vehicle_position"] == "Approaching Intersection":
-            pass
-        elif scenario_info["ego_vehicle_position"] == "Approaching T-Junction":
-            pass
+        spawn_point_motor_way = spawn_points[176]
     elif scenario_info["road_type"] == "Expressway":
         pass
-        
+    spectator_pos_motorway = carla.Transform(spawn_point_motor_way.location + carla.Location(x=20,z=8),
+                        carla.Rotation(yaw = spawn_point_motor_way.rotation.yaw))
+    spectator.set_transform(spectator_pos_motorway)       
+
 # Function to handle the Start Simulation button click
 def start_simulation():
     
@@ -115,30 +113,30 @@ def start_simulation():
     
     spawn_emergency_vehicle()
     
+    set_spectator()
 
 # Function to handle the Set Up Scenario button click
 def setup_scenario():
-    # Gather all the values from the comboboxes
-    road_type = road_type_cb.get()
-    ego_vehicle_position = ego_vehicle_position_cb.get()
-    emv_position = emv_position_cb.get()
-    emv_direction = emv_direction_cb.get()
-    weather_condition = weather_cb.get()
-    time_of_day = time_of_day_cb.get()
-    safety_distance = safety_distance_sb.get()
-    
-    scenario_info = {
-    "road_type": road_type,
-    "ego_vehicle_position": ego_vehicle_position,
-    "emv_position": emv_position,
-    "emv_direction": emv_direction,
-    "weather_condition": weather_condition,
-    "time_of_day": time_of_day,
-    "safety_distance": safety_distance,
-    }
-    
-    map_user_input_to_carla_map(scenario_info)
+    print(scenario_info)
+    # map_user_input_to_carla_map(scenario_info)
     change_vehicle_spawn_point(200, 22)
+    
+# Function to handle value changes in comboboxes
+def on_combobox_road_type_change(event):
+    current_value = event.widget.get()  
+    if current_value != scenario_info["road_type"]:
+        scenario_info["road_type"] = current_value
+        if scenario_info["road_type"] == "Expressway":
+            map_scenario_for_expressway()
+        elif scenario_info["road_type"] == "Motorway":
+            map_scenario_for_motorway()
+            
+# Function to handle value changes in comboboxes
+def on_combobox_change(event, combobox_name):
+    current_value = event.widget.get()  # Get the current value of the combobox
+    if current_value != scenario_info[combobox_name]:
+        print(f"{combobox_name} changed to {current_value}")
+        scenario_info[combobox_name] = current_value  # Update the stored value
 
 # Define a larger font
 large_font = ("Helvetica", 14)
@@ -148,31 +146,37 @@ ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20
 road_type_cb = ttk.Combobox(root, values=road_type_options, state="readonly", font=large_font)
 road_type_cb.set(default_values["road_type"])
 road_type_cb.grid(row=0, column=1, padx=20, pady=10)
+road_type_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_road_type_change(event))
 
 ttk.Label(root, text="Ego Vehicle Position", font=large_font).grid(row=1, column=0, padx=20, pady=10, sticky=tk.W)
 ego_vehicle_position_cb = ttk.Combobox(root, values=ego_vehicle_position_options, state="readonly", font=large_font)
 ego_vehicle_position_cb.set(default_values["ego_vehicle_position"])
 ego_vehicle_position_cb.grid(row=1, column=1, padx=20, pady=10)
+ego_vehicle_position_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_change(event, "ego_vehicle_position"))
 
 ttk.Label(root, text="Emergency Vehicle Position", font=large_font).grid(row=2, column=0, padx=20, pady=10, sticky=tk.W)
 emv_position_cb = ttk.Combobox(root, values=emv_position_options, state="readonly", font=large_font)
 emv_position_cb.set(default_values["emv_position"])
 emv_position_cb.grid(row=2, column=1, padx=20, pady=10)
+emv_position_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_change(event, "emv_position"))
 
 ttk.Label(root, text="EMV Travel Direction", font=large_font).grid(row=3, column=0, padx=20, pady=10, sticky=tk.W)
 emv_direction_cb = ttk.Combobox(root, values=emv_direction_options, state="readonly", font=large_font)
 emv_direction_cb.set(default_values["emv_direction"])
 emv_direction_cb.grid(row=3, column=1, padx=20, pady=10)
+emv_direction_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_change(event, "emv_direction"))
 
 ttk.Label(root, text="Weather Condition", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
 weather_cb = ttk.Combobox(root, values=weather_options, state="readonly", font=large_font)
 weather_cb.set(default_values["weather_condition"])
 weather_cb.grid(row=4, column=1, padx=20, pady=10)
+weather_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_change(event, "weather_condition"))
 
 ttk.Label(root, text="Time of Day", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
 time_of_day_cb = ttk.Combobox(root, values=time_of_day_options, state="readonly", font=large_font)
 time_of_day_cb.set(default_values["time_of_day"])
 time_of_day_cb.grid(row=5, column=1, padx=20, pady=10)
+time_of_day_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_change(event, "time_of_day"))
 
 ttk.Label(root, text="Safety Distance (m)", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
 safety_distance_sb = tk.Spinbox(root, from_=0, to=100, increment=1, font=large_font)
