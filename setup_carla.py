@@ -19,7 +19,6 @@ def spawn_ego_vehicle(ego_spawn_point = 41):
     spawn_points = world.get_map().get_spawn_points()
     vehicle_bp = world.get_blueprint_library().find('vehicle.audi.etron')
     global_ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[ego_spawn_point])
-    # global_ego_vehicle.set_autopilot(True)
     
 def spawn_emergency_vehicle(emv_spawn_point = 231):
     global global_emv_vehicle, world, client
@@ -27,6 +26,21 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     
     emergency_bp = world.get_blueprint_library().find('vehicle.carlamotors.firetruck')
     global_emv_vehicle = world.spawn_actor(emergency_bp, spawn_points[emv_spawn_point])
+    
+    # Turn on the vehicle's (emergency lights)
+    from carla import VehicleLightState as vls
+    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))   
+    
+def set_spectator(desired_location = carla.Location(x=10.0, y=155.0, z=50.0), desired_rotation = carla.Rotation(pitch=-48.658684, yaw=-90.613121, roll=0.000016)):
+    spectator = world.get_spectator()
+    desired_transform = carla.Transform(desired_location, desired_rotation)
+    spectator.set_transform(desired_transform)
+
+def activate_autopilot():
+    global global_ego_vehicle, global_emv_vehicle
+    
+    global_ego_vehicle.set_autopilot(True)
+
     traffic_manager = client.get_trafficmanager()
     traffic_manager_port = traffic_manager.get_port()
 
@@ -35,16 +49,8 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     
     # Make the vehicle ignore traffic lights
     traffic_manager.ignore_lights_percentage(global_emv_vehicle, 100)
-    
-    # Turn on the vehicle's (emergency lights)
-    from carla import VehicleLightState as vls
-    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))   
-    # global_emv_vehicle.set_autopilot(True, traffic_manager_port)
-    
-def set_spectator(desired_location = carla.Location(x=10.0, y=155.0, z=50.0), desired_rotation = carla.Rotation(pitch=-48.658684, yaw=-90.613121, roll=0.000016)):
-    spectator = world.get_spectator()
-    desired_transform = carla.Transform(desired_location, desired_rotation)
-    spectator.set_transform(desired_transform)
+
+    global_emv_vehicle.set_autopilot(True, traffic_manager_port)
 
 def destroy_ego_vehicle():
     global global_ego_vehicle

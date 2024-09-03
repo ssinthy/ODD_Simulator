@@ -10,7 +10,7 @@ root.geometry("600x500")  # Set the window size
 # Default values for each field
 default_values = {
     "road_type": "Motorway",
-    "ego_vehicle_position": "Traffic Lane",
+    "ego_vehicle_position": "Ego Lane",
     "emv_position": "Ego Lane",
     "emv_direction": "Approaches from Behind",
     "weather_condition": "Clear",
@@ -60,12 +60,6 @@ def start_simulation():
     emv_direction_cb.set(default_values["emv_direction"])
     weather_cb.set(default_values["weather_condition"])
     time_of_day_cb.set(default_values["time_of_day"])
-            
-def clean_up_environment():
-    destroy_ego_vehicle()
-    destroy_emv_vehicle()
-
-
 
 # Function to handle value changes in comboboxes
 def on_combobox_road_type_change(event, combobox_name):
@@ -108,7 +102,14 @@ def on_combobox_emv_direction_change(event, combobox_name):
         scenario_info[combobox_name] = current_value
         
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
-        
+
+# Function to handle value changes in comboboxes
+def on_combobox_weather_change(event, combobox_name):
+    pass
+
+# Function to handle value changes in comboboxes
+def on_combobox_day_time_change(event, combobox_name):
+    pass
 
 # Define a larger font
 large_font = ("Helvetica", 14)
@@ -157,7 +158,7 @@ safety_distance_sb.grid(row=6, column=1, padx=20, pady=10)
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
 start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10, ipady=5)
 
-setup_button = ttk.Button(root, text="Simulate Scenario", command=clean_up_environment, style='TButton')
+setup_button = ttk.Button(root, text="Activate Autopilot", command=activate_autopilot, style='TButton')
 setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10, ipady=5)
 
 # Start the main event loop
