@@ -11,7 +11,7 @@ root.geometry("600x500")  # Set the window size
 default_values = {
     "road_type": "Motorway",
     "ego_vehicle_position": "Traffic Lane",
-    "emv_position": "Same Road",
+    "emv_position": "Ego Lane",
     "emv_direction": "Approaches from Behind",
     "weather_condition": "Clear",
     "time_of_day": "Day time",
@@ -23,21 +23,20 @@ scenario_info = default_values.copy()
 
 # Define the options for each combobox
 road_type_options = ["Motorway", "Expressway"]
-ego_vehicle_position_options = ["Traffic Lane", "Approaching Intersection"]
-emv_position_options = ["Same Road", "Parallel Road", "Opposite Road", "Cross Road"]
-emv_direction_options = ["Approaches from Behind", "As Lead Vehicle", "Approaches from Right Lane", "Approaches from Left Lane", "Approaches on Opposite Lane", 
-                         "Approaches Intersection"]
+ego_vehicle_position_options = ["Ego Lane", "Approaching Intersection"]
+emv_position_options = ["Ego Lane", "Parallel Lane", "Opposite Lane", "Cross Road"]
+emv_direction_options = ["Approaches from Behind", "As Lead Vehicle", "Approaches Intersection"]
 weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain"]
 time_of_day_options = ["Day time", "Night time"]
     
 def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
-    if scenario_info["road_type"] == "Motorway" and scenario_info["ego_vehicle_position"] == "Traffic Lane":
-            if  scenario_info["emv_position"] == "Same Road":
+    if scenario_info["road_type"] == "Motorway" and scenario_info["ego_vehicle_position"] == "Ego Lane":
+            if  scenario_info["emv_position"] == "Ego Lane":
                 if  scenario_info["emv_direction"] == "Approaches from Behind":
                     change_emv_vehicle_spawn_point(231)
                 elif  scenario_info["emv_direction"] == "As Lead Vehicle":
                     change_emv_vehicle_spawn_point(37)
-            elif scenario_info["emv_position"] == "Parallel Road":
+            elif scenario_info["emv_position"] == "Parallel Lane":
                 if  scenario_info["emv_direction"] == "Approaches from Behind":
                     change_emv_vehicle_spawn_point(230)
                 elif  scenario_info["emv_direction"] == "As Lead Vehicle":
@@ -78,7 +77,7 @@ def on_combobox_ego_position_change(event, combobox_name):
         scenario_info[combobox_name] = current_value
         
         if scenario_info["road_type"] == "Motorway":
-            if scenario_info[combobox_name] == "Traffic Lane":
+            if scenario_info[combobox_name] == "Ego Lane":
                 change_ego_vehicle_spawn_point(41)
             elif  scenario_info[combobox_name] == "Approaching Intersection":
                 change_ego_vehicle_spawn_point(38)
