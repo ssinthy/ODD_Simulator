@@ -53,14 +53,19 @@ def start_simulation():
     spawn_emergency_vehicle()
     
     set_spectator()
-            
-def clean_up_environment():
-    destroy_ego_vehicle()
-    destroy_emv_vehicle()
+
     road_type_cb.set(default_values["road_type"])
     ego_vehicle_position_cb.set(default_values["ego_vehicle_position"])
     emv_position_cb.set(default_values["emv_position"])
     emv_direction_cb.set(default_values["emv_direction"])
+    weather_cb.set(default_values["weather_condition"])
+    time_of_day_cb.set(default_values["time_of_day"])
+            
+def clean_up_environment():
+    destroy_ego_vehicle()
+    destroy_emv_vehicle()
+
+
 
 # Function to handle value changes in comboboxes
 def on_combobox_road_type_change(event, combobox_name):
@@ -152,7 +157,7 @@ safety_distance_sb.grid(row=6, column=1, padx=20, pady=10)
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
 start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10, ipady=5)
 
-setup_button = ttk.Button(root, text="Clean Up Environment", command=clean_up_environment, style='TButton')
+setup_button = ttk.Button(root, text="Simulate Scenario", command=clean_up_environment, style='TButton')
 setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10, ipady=5)
 
 # Start the main event loop
