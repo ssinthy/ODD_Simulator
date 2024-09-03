@@ -49,13 +49,6 @@ def start_simulation():
     spawn_emergency_vehicle()
     
     set_spectator()
-
-# Function to handle the Set Up Scenario button click
-def setup_scenario():
-    print(scenario_info)
-    # map_user_input_to_carla_map(scenario_info)
-    change_ego_vehicle_spawn_point(200)
-    change_emv_vehicle_spawn_point(22)
             
 # Function to handle value changes in comboboxes
 def on_combobox_road_type_change(event, combobox_name):
@@ -73,10 +66,10 @@ def on_combobox_ego_position_change(event, combobox_name):
         
         if scenario_info["road_type"] == "Motorway":
             if scenario_info[combobox_name] == "Traffic Lane":
-                ego_spawn_point_traffic_lane = 21
+                ego_spawn_point_traffic_lane = 41
                 change_ego_vehicle_spawn_point(ego_spawn_point_traffic_lane)
             elif  scenario_info[combobox_name] == "Approaching Intersection":
-                ego_spawn_point_intersection = 201
+                ego_spawn_point_intersection = 38
                 change_ego_vehicle_spawn_point(ego_spawn_point_intersection)
         
 # Function to handle value changes in comboboxes
@@ -97,8 +90,10 @@ def on_combobox_emv_direction_change(event, combobox_name):
             if scenario_info["ego_vehicle_position"] == "Traffic Lane":
                 if  scenario_info["emv_position"] == "Same Road":
                     if  scenario_info["emv_direction"] == "Approaches from Behind":
-                        emv_spawn_point_intersection = 176
-                        change_ego_vehicle_spawn_point(emv_spawn_point_intersection)
+                        change_emv_vehicle_spawn_point(231)
+                    elif  scenario_info["emv_direction"] == "As Lead Vehicle":
+                        change_emv_vehicle_spawn_point(37)
+                
 
 # Define a larger font
 large_font = ("Helvetica", 14)

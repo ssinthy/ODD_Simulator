@@ -10,19 +10,19 @@ def connect_to_carla():
     global world, client
     client = carla.Client('localhost', 2000)
     client.set_timeout(10.0)
-    world = client.load_world("Town05")
+    world = client.load_world("Town03")
 
 # TODO Separate ego vehicle and emv spawning
-def spawn_ego_vehicle(ego_spawn_point = 21):
+def spawn_ego_vehicle(ego_spawn_point = 41):
     global global_ego_vehicle, world
     # Spawn an emergency vehicle town 5 spawn point 108 / HH map 154
     spawn_points = world.get_map().get_spawn_points()
     vehicle_bp = world.get_blueprint_library().find('vehicle.audi.etron')
     global_ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[ego_spawn_point])
     time.sleep(0.5)
-    global_ego_vehicle.set_autopilot(True)
+    # global_ego_vehicle.set_autopilot(True)
     
-def spawn_emergency_vehicle(emv_spawn_point = 176):
+def spawn_emergency_vehicle(emv_spawn_point = 231):
     global global_emv_vehicle, world, client
     spawn_points = world.get_map().get_spawn_points()
     
@@ -41,14 +41,14 @@ def spawn_emergency_vehicle(emv_spawn_point = 176):
     from carla import VehicleLightState as vls
     global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))
     time.sleep(0.5)    
-    global_emv_vehicle.set_autopilot(True, traffic_manager_port)
+    # global_emv_vehicle.set_autopilot(True, traffic_manager_port)
     
-def set_spectator(spectator_spawn_point = 176):
+def set_spectator(spectator_spawn_point = 41):
     spawn_points = world.get_map().get_spawn_points()
     spectator = world.get_spectator()
     spawn_point_motor_way = spawn_points[spectator_spawn_point]
     
-    spectator_pos_motorway = carla.Transform(spawn_point_motor_way.location + carla.Location(x=20,z=8),
+    spectator_pos_motorway = carla.Transform(spawn_point_motor_way.location + carla.Location(x=40,y=45, z=8),
                         carla.Rotation(yaw = spawn_point_motor_way.rotation.yaw))
     spectator.set_transform(spectator_pos_motorway) 
     

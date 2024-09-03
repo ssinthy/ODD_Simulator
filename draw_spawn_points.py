@@ -5,7 +5,7 @@ def draw_string(world, location, text="first"):
     world.debug.draw_string(location, text, draw_shadow=False, color=carla.Color(255,0,0), life_time=100.0)
 
 def draw_point(world, location, size=0.1):
-    world.debug.draw_point(location, size, carla.Color(255, 0, 0, 0), life_time=50.0)
+    world.debug.draw_point(location, size, carla.Color(255, 0, 0, 0), life_time=500.0)
     
 def draw_hud_box(world, location, thickness=0.1):
     box_size = carla.Vector3D(2.0, 2.0, 0.0)
@@ -36,21 +36,21 @@ parameters = carla.OpendriveGenerationParameters(
 # world = client.generate_opendrive_world(opendrive_string, parameters)
 
 # Get the world and map
-world = client.load_world('Town05')
+world = client.load_world('Town03')
 carla_map = world.get_map()
 # Get the map's spawn points
 spawn_points = world.get_map().get_spawn_points()
 bp_lib = world.get_blueprint_library()
 
 vehicle_bp = bp_lib.find('vehicle.audi.etron')
-ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[21])
+ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[41])
 
 # Spawn an emergency vehicle
 emergency_bp = world.get_blueprint_library().find('vehicle.carlamotors.firetruck')
-emergency_vehicle = world.spawn_actor(emergency_bp, spawn_points[176])
+emergency_vehicle = world.spawn_actor(emergency_bp, spawn_points[231])
 
 
-spawn_point_motor_way = spawn_points[176]
+spawn_point_motor_way = spawn_points[202]
 
 # Get spectator
 spectator = world.get_spectator()
@@ -59,10 +59,17 @@ location = ego_vehicle.get_location()
 
 transform = carla.Transform(ego_vehicle.get_transform().transform(carla.Location(x=-4, z=2)), ego_vehicle.get_transform().rotation)
 
-spectator_pos_motorway = carla.Transform(spawn_point_motor_way.location + carla.Location(x=20,z=8),
+spectator_pos_motorway_1 = carla.Transform(spawn_point_motor_way.location + carla.Location(x=20,z=8),
                             carla.Rotation(yaw = spawn_point_motor_way.rotation.yaw))
-spectator.set_transform(spectator_pos_motorway)
 
+spectator_pos_motorway = carla.Transform(carla.Location(x=10.7, y=155.7,z=8.28))
+
+desired_location = carla.Location(x=10.0, y=155.0, z=50.0)
+desired_rotation = carla.Rotation(pitch=-27.185455, yaw=-90.651497, roll=0.000021)
+desired_transform = carla.Transform(desired_location, desired_rotation)
+
+print("spectator_pos_motorway", spectator_pos_motorway)
+spectator.set_transform(desired_transform)
 
 # draw spawn points
 for i in range(0, len(spawn_points)):
@@ -70,11 +77,24 @@ for i in range(0, len(spawn_points)):
     draw_string(world, spawn_points[i].location, str)
 
 
+try:
+    while True:
+        spectator_transform = spectator.get_transform()
+        location = spectator_transform.location
+        print(f"Spectator Location: {location}")
+        rotation = spectator_transform.rotation
+        print(f"Spectator roatation: {rotation}")
+        time.sleep(1)
+    
+except KeyboardInterrupt:
+        print("Exited by user")
+
+'''
 # draw_hud_box(world, first_spawn_point.location)
 # Add some delay to visualize the changes
 #time.sleep(50)
 
-'''
+
 # Get waypoint
 waypoints = carla_map.get_topology()
 
