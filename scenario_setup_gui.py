@@ -5,7 +5,7 @@ from setup_carla import *
 # Initialize the main window
 root = tk.Tk()
 root.title("ScenarioInfoManager")
-root.geometry("600x400")  # Set the window size
+root.geometry("600x500")  # Set the window size
 
 # Default values for each field
 default_values = {
@@ -30,13 +30,18 @@ emv_direction_options = ["Approaches from Behind", "As Lead Vehicle", "Approache
 weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain"]
 time_of_day_options = ["Day time", "Night time"]
     
-def map_scenario_for_motorway(scenario_info):
-    if scenario_info["ego_vehicle_position"] == "Traffic Lane":
-        pass
-    elif scenario_info["ego_vehicle_position"] == "Approaching Intersection":
-        pass
-    elif scenario_info["ego_vehicle_position"] == "Approaching T-Junction":
-        pass
+def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
+    if scenario_info["road_type"] == "Motorway" and scenario_info["ego_vehicle_position"] == "Traffic Lane":
+            if  scenario_info["emv_position"] == "Same Road":
+                if  scenario_info["emv_direction"] == "Approaches from Behind":
+                    change_emv_vehicle_spawn_point(231)
+                elif  scenario_info["emv_direction"] == "As Lead Vehicle":
+                    change_emv_vehicle_spawn_point(37)
+            elif scenario_info["emv_position"] == "Parallel Road":
+                if  scenario_info["emv_direction"] == "Approaches from Behind":
+                    change_emv_vehicle_spawn_point(230)
+                elif  scenario_info["emv_direction"] == "As Lead Vehicle":
+                    change_emv_vehicle_spawn_point(38)
         
 
 # Function to handle the Start Simulation button click
@@ -50,6 +55,14 @@ def start_simulation():
     
     set_spectator()
             
+def clean_up_environment():
+    destroy_ego_vehicle()
+    destroy_emv_vehicle()
+    road_type_cb.set(default_values["road_type"])
+    ego_vehicle_position_cb.set(default_values["ego_vehicle_position"])
+    emv_position_cb.set(default_values["emv_position"])
+    emv_direction_cb.set(default_values["emv_direction"])
+
 # Function to handle value changes in comboboxes
 def on_combobox_road_type_change(event, combobox_name):
     current_value = event.widget.get()  
@@ -66,11 +79,9 @@ def on_combobox_ego_position_change(event, combobox_name):
         
         if scenario_info["road_type"] == "Motorway":
             if scenario_info[combobox_name] == "Traffic Lane":
-                ego_spawn_point_traffic_lane = 41
-                change_ego_vehicle_spawn_point(ego_spawn_point_traffic_lane)
+                change_ego_vehicle_spawn_point(41)
             elif  scenario_info[combobox_name] == "Approaching Intersection":
-                ego_spawn_point_intersection = 38
-                change_ego_vehicle_spawn_point(ego_spawn_point_intersection)
+                change_ego_vehicle_spawn_point(38)
         
 # Function to handle value changes in comboboxes
 def on_combobox_emv_position_change(event, combobox_name):
@@ -78,22 +89,22 @@ def on_combobox_emv_position_change(event, combobox_name):
     if current_value != scenario_info[combobox_name]:
         print(f"{combobox_name} changed to {current_value}")
         scenario_info[combobox_name] = current_value
+        # emv_direction_cb.set("Approaches from Behind")
+        # scenario_info["emv_direction"] = "Approaches from Behind"
+        
+        map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
+            
                     
 # Function to handle value changes in comboboxes
 def on_combobox_emv_direction_change(event, combobox_name):
-    current_value = event.widget.get()  
+    current_value = event.widget.get()
+    print("scenario_info[combobox_name]", scenario_info[combobox_name])
     if current_value != scenario_info[combobox_name]:
         print(f"{combobox_name} changed to {current_value}")
         scenario_info[combobox_name] = current_value
         
-        if scenario_info["road_type"] == "Motorway":
-            if scenario_info["ego_vehicle_position"] == "Traffic Lane":
-                if  scenario_info["emv_position"] == "Same Road":
-                    if  scenario_info["emv_direction"] == "Approaches from Behind":
-                        change_emv_vehicle_spawn_point(231)
-                    elif  scenario_info["emv_direction"] == "As Lead Vehicle":
-                        change_emv_vehicle_spawn_point(37)
-                
+        map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
+        
 
 # Define a larger font
 large_font = ("Helvetica", 14)
@@ -142,9 +153,8 @@ safety_distance_sb.grid(row=6, column=1, padx=20, pady=10)
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
 start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10, ipady=5)
 
-'''
-setup_button = ttk.Button(root, text="Set Up Scenario", command=setup_scenario, style='TButton')
+setup_button = ttk.Button(root, text="Clean Up Environment", command=clean_up_environment, style='TButton')
 setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10, ipady=5)
-'''
+
 # Start the main event loop
 root.mainloop()

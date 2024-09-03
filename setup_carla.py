@@ -19,7 +19,6 @@ def spawn_ego_vehicle(ego_spawn_point = 41):
     spawn_points = world.get_map().get_spawn_points()
     vehicle_bp = world.get_blueprint_library().find('vehicle.audi.etron')
     global_ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[ego_spawn_point])
-    time.sleep(0.5)
     # global_ego_vehicle.set_autopilot(True)
     
 def spawn_emergency_vehicle(emv_spawn_point = 231):
@@ -39,28 +38,30 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     
     # Turn on the vehicle's (emergency lights)
     from carla import VehicleLightState as vls
-    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))
-    time.sleep(0.5)    
+    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))   
     # global_emv_vehicle.set_autopilot(True, traffic_manager_port)
     
-def set_spectator(spectator_spawn_point = 41):
-    spawn_points = world.get_map().get_spawn_points()
+def set_spectator(desired_location = carla.Location(x=10.0, y=155.0, z=50.0), desired_rotation = carla.Rotation(pitch=-48.658684, yaw=-90.613121, roll=0.000016)):
     spectator = world.get_spectator()
-    spawn_point_motor_way = spawn_points[spectator_spawn_point]
-    
-    spectator_pos_motorway = carla.Transform(spawn_point_motor_way.location + carla.Location(x=40,y=45, z=8),
-                        carla.Rotation(yaw = spawn_point_motor_way.rotation.yaw))
-    spectator.set_transform(spectator_pos_motorway) 
+    desired_transform = carla.Transform(desired_location, desired_rotation)
+    spectator.set_transform(desired_transform)
+
+def destroy_ego_vehicle():
+    global global_ego_vehicle
+
+    if global_ego_vehicle != None:
+        global_ego_vehicle.destroy()
+
+def destroy_emv_vehicle():
+    global global_emv_vehicle
+
+    if global_emv_vehicle != None:
+        global_emv_vehicle.destroy()
     
 def change_ego_vehicle_spawn_point(ego_spawn_point):
-    global global_ego_vehicle
-    
-    global_ego_vehicle.destroy()
+    destroy_ego_vehicle()
     spawn_ego_vehicle(ego_spawn_point)
     
 def change_emv_vehicle_spawn_point(emv_spawn_point):
-    global global_emv_vehicle
-
-    global_emv_vehicle.destroy()
-    
+    destroy_emv_vehicle()
     spawn_emergency_vehicle(emv_spawn_point)

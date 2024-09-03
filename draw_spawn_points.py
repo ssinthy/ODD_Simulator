@@ -47,7 +47,7 @@ ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[41])
 
 # Spawn an emergency vehicle
 emergency_bp = world.get_blueprint_library().find('vehicle.carlamotors.firetruck')
-emergency_vehicle = world.spawn_actor(emergency_bp, spawn_points[231])
+emergency_vehicle = world.spawn_actor(emergency_bp, spawn_points[69])
 
 
 spawn_point_motor_way = spawn_points[202]
@@ -65,7 +65,7 @@ spectator_pos_motorway_1 = carla.Transform(spawn_point_motor_way.location + carl
 spectator_pos_motorway = carla.Transform(carla.Location(x=10.7, y=155.7,z=8.28))
 
 desired_location = carla.Location(x=10.0, y=155.0, z=50.0)
-desired_rotation = carla.Rotation(pitch=-27.185455, yaw=-90.651497, roll=0.000021)
+desired_rotation = carla.Rotation(pitch=-48.658684, yaw=-90.613121, roll=0.000016)
 desired_transform = carla.Transform(desired_location, desired_rotation)
 
 print("spectator_pos_motorway", spectator_pos_motorway)
@@ -76,7 +76,7 @@ for i in range(0, len(spawn_points)):
     str = f"point {i}"
     draw_string(world, spawn_points[i].location, str)
 
-
+'''
 try:
     while True:
         spectator_transform = spectator.get_transform()
@@ -89,7 +89,7 @@ try:
 except KeyboardInterrupt:
         print("Exited by user")
 
-'''
+
 # draw_hud_box(world, first_spawn_point.location)
 # Add some delay to visualize the changes
 #time.sleep(50)
