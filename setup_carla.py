@@ -1,4 +1,5 @@
 import carla
+import time
 
 global_ego_vehicle = None
 global_emv_vehicle = None
@@ -18,6 +19,7 @@ def spawn_ego_vehicle(ego_spawn_point = 21):
     spawn_points = world.get_map().get_spawn_points()
     vehicle_bp = world.get_blueprint_library().find('vehicle.audi.etron')
     global_ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[ego_spawn_point])
+    time.sleep(0.5)
     global_ego_vehicle.set_autopilot(True)
     
 def spawn_emergency_vehicle(emv_spawn_point = 176):
@@ -38,7 +40,7 @@ def spawn_emergency_vehicle(emv_spawn_point = 176):
     # Turn on the vehicle's (emergency lights)
     from carla import VehicleLightState as vls
     global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))
-        
+    time.sleep(0.5)    
     global_emv_vehicle.set_autopilot(True, traffic_manager_port)
     
 def set_spectator(spectator_spawn_point = 176):
@@ -54,7 +56,6 @@ def change_ego_vehicle_spawn_point(ego_spawn_point):
     global global_ego_vehicle
     
     global_ego_vehicle.destroy()
-    
     spawn_ego_vehicle(ego_spawn_point)
     
 def change_emv_vehicle_spawn_point(emv_spawn_point):
