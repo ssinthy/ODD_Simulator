@@ -42,12 +42,8 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
                 elif  scenario_info["emv_direction"] == "As Lead Vehicle":
                     change_emv_vehicle_spawn_point(38)
             elif scenario_info["emv_position"] == "Opposite Lane":
-                emv_direction_cb.set("")
-                scenario_info["emv_direction"] = ""
                 change_emv_vehicle_spawn_point(118)
             elif scenario_info["emv_position"] == "Cross Road":
-                emv_direction_cb.set("")
-                scenario_info["emv_direction"] = ""
                 change_emv_vehicle_spawn_point(69)
 
 # Function to handle the Start Simulation button click

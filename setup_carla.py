@@ -31,7 +31,7 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     from carla import VehicleLightState as vls
     global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))   
     
-def set_spectator(desired_location = carla.Location(x=24.953684, y=201.391769, z=118.926270), desired_rotation = carla.Rotation(pitch=-64.051315, yaw=-90.070381, roll=0)):
+def set_spectator(desired_location = carla.Location(x=10.123159, y=163.428955, z=59.248718), desired_rotation = carla.Rotation(pitch=-51.381760, yaw=-89.331596, roll=0)):
     spectator = world.get_spectator()
     desired_transform = carla.Transform(desired_location, desired_rotation)
     spectator.set_transform(desired_transform)
