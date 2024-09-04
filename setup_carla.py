@@ -36,21 +36,22 @@ def set_spectator(desired_location = carla.Location(x=10.123159, y=163.428955, z
     desired_transform = carla.Transform(desired_location, desired_rotation)
     spectator.set_transform(desired_transform)
 
-def activate_autopilot():
+def activate_autopilot(emv_position):
     global global_ego_vehicle, global_emv_vehicle
     
     global_ego_vehicle.set_autopilot(True)
 
-    traffic_manager = client.get_trafficmanager()
-    traffic_manager_port = traffic_manager.get_port()
+    if emv_position != "Parked":
+        traffic_manager = client.get_trafficmanager()
+        traffic_manager_port = traffic_manager.get_port()
 
-    # Set the vehicle to drive 30% faster than the current speed limit
-    traffic_manager.vehicle_percentage_speed_difference(global_emv_vehicle, -30)  # No speed variation
-    
-    # Make the vehicle ignore traffic lights
-    traffic_manager.ignore_lights_percentage(global_emv_vehicle, 100)
+        # Set the vehicle to drive 30% faster than the current speed limit
+        traffic_manager.vehicle_percentage_speed_difference(global_emv_vehicle, -30)  # No speed variation
+        
+        # Make the vehicle ignore traffic lights
+        traffic_manager.ignore_lights_percentage(global_emv_vehicle, 100)
 
-    global_emv_vehicle.set_autopilot(True, traffic_manager_port)
+        global_emv_vehicle.set_autopilot(True, traffic_manager_port)
 
 def destroy_ego_vehicle():
     global global_ego_vehicle

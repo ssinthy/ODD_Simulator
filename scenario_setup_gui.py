@@ -24,7 +24,7 @@ scenario_info = default_values.copy()
 # Define the options for each combobox
 road_type_options = ["Motorway", "Expressway"]
 ego_vehicle_position_options = ["Ego Lane", "Approaching Intersection"]
-emv_position_options = ["Ego Lane", "Parallel Lane", "Opposite Lane", "Cross Road"]
+emv_position_options = ["Ego Lane", "Parallel Lane", "Opposite Lane", "Cross Road", "Parked"]
 emv_direction_options = ["Approaches from Behind", "As Lead Vehicle", "Approaches Intersection"]
 weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain"]
 time_of_day_options = ["Day time", "Night time"]
@@ -45,6 +45,9 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
                 change_emv_vehicle_spawn_point(118)
             elif scenario_info["emv_position"] == "Cross Road":
                 change_emv_vehicle_spawn_point(68)
+            elif scenario_info["emv_position"] == "Parked":
+                change_emv_vehicle_spawn_point(207)
+                change_ego_vehicle_spawn_point(160)
 
 # Function to handle the Start Simulation button click
 def start_simulation():
@@ -159,7 +162,7 @@ safety_distance_sb.grid(row=6, column=1, padx=20, pady=10)
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
 start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10, ipady=5)
 
-setup_button = ttk.Button(root, text="Activate Autopilot", command=activate_autopilot, style='TButton')
+setup_button = ttk.Button(root, text="Activate Autopilot", command=lambda: activate_autopilot(scenario_info["emv_position"]), style='TButton')
 setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10, ipady=5)
 
 # Start the main event loop
