@@ -41,7 +41,14 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
                     change_emv_vehicle_spawn_point(230)
                 elif  scenario_info["emv_direction"] == "As Lead Vehicle":
                     change_emv_vehicle_spawn_point(38)
-        
+            elif scenario_info["emv_position"] == "Opposite Lane":
+                emv_direction_cb.set("")
+                scenario_info["emv_direction"] = ""
+                change_emv_vehicle_spawn_point(118)
+            elif scenario_info["emv_position"] == "Cross Road":
+                emv_direction_cb.set("")
+                scenario_info["emv_direction"] = ""
+                change_emv_vehicle_spawn_point(69)
 
 # Function to handle the Start Simulation button click
 def start_simulation():
@@ -87,8 +94,6 @@ def on_combobox_emv_position_change(event, combobox_name):
     if current_value != scenario_info[combobox_name]:
         print(f"{combobox_name} changed to {current_value}")
         scenario_info[combobox_name] = current_value
-        # emv_direction_cb.set("Approaches from Behind")
-        # scenario_info["emv_direction"] = "Approaches from Behind"
         
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
             
