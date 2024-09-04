@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from setup_carla import *
+from carla_setup import *
 # Initialize the main window
 root = tk.Tk()
 root.title("ScenarioInfoManager")
@@ -47,7 +47,6 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
                 change_emv_vehicle_spawn_point(68)
             elif scenario_info["emv_position"] == "Parked":
                 change_emv_vehicle_spawn_point(207)
-                change_ego_vehicle_spawn_point(160)
 
 # Function to handle the Start Simulation button click
 def start_simulation():
