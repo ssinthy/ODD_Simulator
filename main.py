@@ -64,8 +64,6 @@ def start_simulation():
     ego_vehicle_position_cb.set(default_values["ego_vehicle_position"])
     emv_position_cb.set(default_values["emv_position"])
     emv_direction_cb.set(default_values["emv_direction"])
-    weather_cb.set(default_values["weather_condition"])
-    time_of_day_cb.set(default_values["time_of_day"])
 
 # Function to handle value changes in comboboxes
 def on_combobox_road_type_change(event, combobox_name):
@@ -106,14 +104,6 @@ def on_combobox_emv_direction_change(event, combobox_name):
         
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
 
-# Function to handle value changes in comboboxes
-def on_combobox_weather_change(event, combobox_name):
-    pass
-
-# Function to handle value changes in comboboxes
-def on_combobox_day_time_change(event, combobox_name):
-    pass
-
 # Define a larger font
 large_font = ("Helvetica", 14)
 
@@ -142,17 +132,13 @@ emv_direction_cb.set(default_values["emv_direction"])
 emv_direction_cb.grid(row=3, column=1, padx=20, pady=10)
 emv_direction_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_direction_change(event, "emv_direction"))
 
-ttk.Label(root, text="Weather Condition", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
-weather_cb = ttk.Combobox(root, values=weather_options, state="readonly", font=large_font)
-weather_cb.set(default_values["weather_condition"])
-weather_cb.grid(row=4, column=1, padx=20, pady=10)
-weather_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_weather_change(event, "weather_condition"))
+ttk.Label(root, text="Change EV Position", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
+change_ev_position_btn_5m = ttk.Button(root, text="Ego +5m", command=lambda: change_vehicle_position(5, "ego"), style='TButton')
+change_ev_position_btn_5m.grid(row=4, column=1, padx=10, pady=10)
 
-ttk.Label(root, text="Time of Day", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
-time_of_day_cb = ttk.Combobox(root, values=time_of_day_options, state="readonly", font=large_font)
-time_of_day_cb.set(default_values["time_of_day"])
-time_of_day_cb.grid(row=5, column=1, padx=20, pady=10)
-time_of_day_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_day_time_change(event, "time_of_day"))
+ttk.Label(root, text="Change EMV Position", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
+change_emv_position_btn = ttk.Button(root, text="EMV +5m", command=lambda: change_vehicle_position(5, "emv"), style='TButton')
+change_emv_position_btn.grid(row=5, column=1, padx=10, pady=5)
 
 ttk.Label(root, text="Safety Distance (m)", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
 safety_distance_sb = tk.Spinbox(root, from_=0, to=100, increment=1, font=large_font)

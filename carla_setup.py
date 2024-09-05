@@ -1,5 +1,6 @@
 import carla
 import time
+import math
 
 global_ego_vehicle = None
 global_emv_vehicle = None
@@ -54,6 +55,31 @@ def activate_autopilot(emv_position):
         traffic_manager.ignore_lights_percentage(global_emv_vehicle, 100)
 
         global_emv_vehicle.set_autopilot(True, traffic_manager_port)
+        
+def change_vehicle_position(distance, vehicle_type):
+    global global_ego_vehicle, global_emv_vehicle
+    
+    current_vehicle = global_emv_vehicle if vehicle_type != "ego" else global_ego_vehicle
+    
+    transform = current_vehicle.get_transform()
+    location = transform.location
+    rotation = transform.rotation
+
+    # Calculate the forward offset based on the vehicle's rotation
+    forward_distance = distance  # Distance to move forward (1 meter)
+    rad_yaw = math.radians(rotation.yaw)  # Convert yaw to radians
+
+    # Update location to move 1 meter forward
+    new_x = location.x + forward_distance * math.cos(rad_yaw)
+    new_y = location.y + forward_distance * math.sin(rad_yaw)
+    new_location = carla.Location(new_x, new_y, location.z)
+
+    # Set the new transform with the updated location
+    new_transform = carla.Transform(new_location, rotation)
+    current_vehicle.set_transform(new_transform)
+
+    # Pause to observe the movement
+    time.sleep(2)
 
 def destroy_ego_vehicle():
     global global_ego_vehicle
