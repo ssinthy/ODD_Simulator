@@ -133,22 +133,22 @@ emv_direction_cb.grid(row=3, column=1, padx=20, pady=10)
 emv_direction_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_direction_change(event, "emv_direction"))
 
 ttk.Label(root, text="Change EV Position", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
-change_ev_position_btn_5m = ttk.Button(root, text="Ego +5m", command=lambda: change_vehicle_position(5, "ego"), style='TButton')
-change_ev_position_btn_5m.grid(row=4, column=1, padx=10, pady=10)
+change_ev_position_btn_5m = ttk.Button(root, text="Ego move forward +5m", command=lambda: change_vehicle_position(5, "ego"), style='TButton')
+change_ev_position_btn_5m.grid(row=4, column=1, columnspan=2, pady=20, ipadx=10)
 
 ttk.Label(root, text="Change EMV Position", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
-change_emv_position_btn = ttk.Button(root, text="EMV +5m", command=lambda: change_vehicle_position(5, "emv"), style='TButton')
-change_emv_position_btn.grid(row=5, column=1, padx=10, pady=5)
+change_emv_position_btn = ttk.Button(root, text="EMV move forward +5m", command=lambda: change_vehicle_position(5, "emv"), style='TButton')
+change_emv_position_btn.grid(row=5, column=1, columnspan=2, pady=20, ipadx=10)
 
 ttk.Label(root, text="Safety Distance (m)", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
 safety_distance_sb = tk.Spinbox(root, from_=0, to=100, increment=1, font=large_font)
 safety_distance_sb.grid(row=6, column=1, padx=20, pady=10)
 
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
-start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10, ipady=5)
+start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10)
 
 setup_button = ttk.Button(root, text="Activate Autopilot", command=lambda: activate_autopilot(scenario_info["emv_position"]), style='TButton')
-setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10, ipady=5)
+setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10)
 
 # Start the main event loop
 root.mainloop()
