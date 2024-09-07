@@ -133,11 +133,11 @@ emv_direction_cb.grid(row=3, column=1, padx=20, pady=10)
 emv_direction_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_direction_change(event, "emv_direction"))
 
 ttk.Label(root, text="Change EV Position", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
-change_ev_position_btn_5m = ttk.Button(root, text="Ego move forward +5m", command=lambda: change_vehicle_position(5, "ego"), style='TButton')
+change_ev_position_btn_5m = ttk.Button(root, text="Move forward +5m", command=lambda: change_vehicle_position(5, "ego"), style='TButton')
 change_ev_position_btn_5m.grid(row=4, column=1, columnspan=2, pady=20, ipadx=10)
 
 ttk.Label(root, text="Change EMV Position", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
-change_emv_position_btn = ttk.Button(root, text="EMV move forward +5m", command=lambda: change_vehicle_position(5, "emv"), style='TButton')
+change_emv_position_btn = ttk.Button(root, text="Move forward +5m", command=lambda: change_vehicle_position(5, "emv"), style='TButton')
 change_emv_position_btn.grid(row=5, column=1, columnspan=2, pady=20, ipadx=10)
 
 ttk.Label(root, text="Safety Distance (m)", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
