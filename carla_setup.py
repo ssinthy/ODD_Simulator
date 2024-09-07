@@ -1,11 +1,18 @@
 import carla
 import time
 import math
+import random
 
 global_ego_vehicle = None
 global_emv_vehicle = None
 world = None
 client = None
+
+# To import a basic agent
+from agents.navigation.basic_agent import BasicAgent
+
+# To import a behavior agent
+from agents.navigation.behavior_agent import BehaviorAgent
 
 def connect_to_carla():
     global world, client
@@ -25,7 +32,7 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     global global_emv_vehicle, world, client
     spawn_points = world.get_map().get_spawn_points()
     
-    emergency_bp = world.get_blueprint_library().find('vehicle.carlamotors.firetruck')
+    emergency_bp = world.get_blueprint_library().find('vehicle.dodge.charger_police')
     global_emv_vehicle = world.spawn_actor(emergency_bp, spawn_points[emv_spawn_point])
     
     # Turn on the vehicle's (emergency lights)
@@ -41,20 +48,35 @@ def set_spectator():
 
 def activate_autopilot(emv_position):
     global global_ego_vehicle, global_emv_vehicle
+    spawn_points = world.get_map().get_spawn_points()
     
-    global_ego_vehicle.set_autopilot(True)
+    ego_agent = BasicAgent(global_ego_vehicle)
+    emv_agent = BasicAgent(global_emv_vehicle)
 
-    if emv_position != "Parked":
-        traffic_manager = client.get_trafficmanager()
-        traffic_manager_port = traffic_manager.get_port()
-
-        # Set the vehicle to drive 30% faster than the current speed limit
-        traffic_manager.vehicle_percentage_speed_difference(global_emv_vehicle, -30)  # No speed variation
+    destination = spawn_points[180].location
+    destination_ego = spawn_points[171].location
+    
+    ego_agent.set_destination(destination_ego)
+    ego_agent.follow_speed_limits(value=False)
+    ego_agent.set_target_speed(100)
+    ego_agent.ignore_traffic_lights(active=True)
+    
+    emv_agent.set_destination(destination)
+    emv_agent.follow_speed_limits(value=False)
+    emv_agent.set_target_speed(100) # km/h
+    emv_agent.ignore_traffic_lights(active=True)
+    
+    while True:
+        if ego_agent.done():
+            print("The target has been reached, stopping the simulation")
+            break
+        global_ego_vehicle.apply_control(ego_agent.run_step())
+        global_emv_vehicle.apply_control(emv_agent.run_step())
         
-        # Make the vehicle ignore traffic lights
-        traffic_manager.ignore_lights_percentage(global_emv_vehicle, 100)
-
-        global_emv_vehicle.set_autopilot(True, traffic_manager_port)
+        velocity_vector = global_emv_vehicle.get_velocity()
+        speed_mps = math.sqrt(velocity_vector.x**2 + velocity_vector.y**2 + velocity_vector.z**2)
+        speed_kmh = speed_mps * 3.6
+        print(f"Current speed: {speed_kmh:.2f} km/h")
         
 def change_vehicle_position(distance, vehicle_type):
     global global_ego_vehicle, global_emv_vehicle
