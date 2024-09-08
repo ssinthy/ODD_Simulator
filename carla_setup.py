@@ -46,25 +46,27 @@ def set_spectator():
     desired_transform = carla.Transform(desired_location, desired_rotation)
     spectator.set_transform(desired_transform)
 
-def activate_autopilot(emv_position):
+def activate_autopilot(emv_action, ego_action, ):
     global global_ego_vehicle, global_emv_vehicle
     spawn_points = world.get_map().get_spawn_points()
     
     ego_agent = BasicAgent(global_ego_vehicle)
     emv_agent = BasicAgent(global_emv_vehicle)
-
-    destination = spawn_points[180].location
-    destination_ego = spawn_points[171].location
-    
-    ego_agent.set_destination(destination_ego)
-    ego_agent.follow_speed_limits(value=False)
-    ego_agent.set_target_speed(80)
     ego_agent.ignore_traffic_lights(active=True)
-    
-    emv_agent.set_destination(destination)
-    emv_agent.follow_speed_limits(value=False)
-    emv_agent.set_target_speed(80) # km/h
     emv_agent.ignore_traffic_lights(active=True)
+    
+    ego_agent.follow_speed_limits(value=False)
+    emv_agent.follow_speed_limits(value=False)
+
+    
+    destination_ego = spawn_points[171].location
+    ego_agent.set_destination(destination_ego)
+    ego_agent.set_target_speed(80)
+    
+    destination_emv = spawn_points[180].location
+    emv_agent.set_destination(destination_emv)
+    emv_agent.set_target_speed(80) # km/h
+    
     
     while True:
         if ego_agent.done():
@@ -72,11 +74,6 @@ def activate_autopilot(emv_position):
             break
         global_ego_vehicle.apply_control(ego_agent.run_step())
         global_emv_vehicle.apply_control(emv_agent.run_step())
-        
-        velocity_vector = global_emv_vehicle.get_velocity()
-        speed_mps = math.sqrt(velocity_vector.x**2 + velocity_vector.y**2 + velocity_vector.z**2)
-        speed_kmh = speed_mps * 3.6
-        print(f"Current speed: {speed_kmh:.2f} km/h")
         
 def change_vehicle_position(distance, vehicle_type):
     global global_ego_vehicle, global_emv_vehicle
