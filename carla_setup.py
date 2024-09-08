@@ -32,7 +32,7 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     global global_emv_vehicle, world, client
     spawn_points = world.get_map().get_spawn_points()
     
-    emergency_bp = world.get_blueprint_library().find('vehicle.dodge.charger_police')
+    emergency_bp = world.get_blueprint_library().find('vehicle.ford.ambulance')
     global_emv_vehicle = world.spawn_actor(emergency_bp, spawn_points[emv_spawn_point])
     
     # Turn on the vehicle's (emergency lights)
@@ -58,12 +58,12 @@ def activate_autopilot(emv_position):
     
     ego_agent.set_destination(destination_ego)
     ego_agent.follow_speed_limits(value=False)
-    ego_agent.set_target_speed(100)
+    ego_agent.set_target_speed(80)
     ego_agent.ignore_traffic_lights(active=True)
     
     emv_agent.set_destination(destination)
     emv_agent.follow_speed_limits(value=False)
-    emv_agent.set_target_speed(100) # km/h
+    emv_agent.set_target_speed(80) # km/h
     emv_agent.ignore_traffic_lights(active=True)
     
     while True:
