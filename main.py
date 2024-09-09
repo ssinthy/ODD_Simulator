@@ -109,7 +109,7 @@ def activate_autopilot_mode():
 # Initialize the main window
 root = tk.Tk()
 root.title("ScenarioInfoManager")
-root.geometry("600x600")  # Set the window size
+root.geometry("600x700")  # Set the window size
 
 # Define a larger font
 large_font = ("Helvetica", 14)
@@ -169,11 +169,19 @@ ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=9, col
 emv_velocity_sb = tk.Spinbox(root, from_=10, to=100, increment=10, font=large_font)
 emv_velocity_sb.grid(row=9, column=1, padx=20, pady=10)
 
+ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)
+ego_velocity_sb = tk.Spinbox(root, from_=0, to=50, increment=1, font=large_font)
+ego_velocity_sb.grid(row=10, column=1, padx=20, pady=10)
+
+ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=11, column=0, padx=20, pady=10, sticky=tk.W)
+emv_velocity_sb = tk.Spinbox(root, from_=0, to=50, increment=1, font=large_font)
+emv_velocity_sb.grid(row=11, column=1, padx=20, pady=10)
+
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
-start_button.grid(row=10, column=0, pady=20, ipadx=10)
+start_button.grid(row=12, column=0, pady=20, ipadx=10)
 
 setup_button = ttk.Button(root, text="Activate Autopilot", command=activate_autopilot_mode, style='TButton')
-setup_button.grid(row=10, column=1, pady=10, ipadx=10)
+setup_button.grid(row=12, column=1, pady=10, ipadx=10)
 
 # Start the main event loop
 root.mainloop()
