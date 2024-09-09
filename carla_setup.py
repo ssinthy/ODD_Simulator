@@ -46,7 +46,7 @@ def set_spectator():
     desired_transform = carla.Transform(desired_location, desired_rotation)
     spectator.set_transform(desired_transform)
 
-def activate_autopilot(emv_action, ego_action, ):
+def activate_autopilot(ego_velocity, emv_velocity):
     global global_ego_vehicle, global_emv_vehicle
     spawn_points = world.get_map().get_spawn_points()
     
@@ -61,7 +61,7 @@ def activate_autopilot(emv_action, ego_action, ):
     
     destination_ego = spawn_points[171].location
     ego_agent.set_destination(destination_ego)
-    ego_agent.set_target_speed(80)
+    ego_agent.set_target_speed(ego_velocity)
     
     destination_emv = spawn_points[180].location
     emv_agent.set_destination(destination_emv)

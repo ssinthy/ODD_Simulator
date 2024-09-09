@@ -2,10 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 from carla_setup import *
-# Initialize the main window
-root = tk.Tk()
-root.title("ScenarioInfoManager")
-root.geometry("600x500")  # Set the window size
 
 # Default values for each field
 default_values = {
@@ -15,7 +11,8 @@ default_values = {
     "emv_direction": "Approaches from Behind",
     "weather_condition": "Clear",
     "time_of_day": "Day time",
-    "safety_distance": "0",
+    "ev_action": "Go Straight",
+    "emv_action": "Go Straight"
 }
 
 # Dictionary to store previous values of comboboxes and spinbox
@@ -28,6 +25,8 @@ emv_position_options = ["Ego Lane", "Parallel Lane", "Opposite Lane", "Cross Roa
 emv_direction_options = ["Approaches from Behind", "As Lead Vehicle"]
 weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain"]
 time_of_day_options = ["Day time", "Night time"]
+ev_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn Right", "Turn Left", "Turn Right"]
+emv_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn Right", "Turn Left", "Turn Right"]
     
 def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
         if  scenario_info["emv_position"] == "Ego Lane":
@@ -103,9 +102,21 @@ def on_combobox_emv_direction_change(event, combobox_name):
         scenario_info[combobox_name] = current_value
         
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
+        
+def activate_autopilot_mode():
+    activate_autopilot(ego_velocity=ego_velocity_sb.get(), emv_velocity=emv_velocity_sb.get())
+    
+# Initialize the main window
+root = tk.Tk()
+root.title("ScenarioInfoManager")
+root.geometry("600x600")  # Set the window size
 
 # Define a larger font
 large_font = ("Helvetica", 14)
+
+# Create a style object
+style = ttk.Style()
+style.configure('TButton', font=large_font)
 
 # Create and place the widgets
 ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20, pady=10, sticky=tk.W)
@@ -140,15 +151,29 @@ ttk.Label(root, text="Change EMV Position", font=large_font).grid(row=5, column=
 change_emv_position_btn = ttk.Button(root, text="Move forward +5m", command=lambda: change_vehicle_position(5, "emv"), style='TButton')
 change_emv_position_btn.grid(row=5, column=1, columnspan=2, pady=20, ipadx=10)
 
-ttk.Label(root, text="Safety Distance (m)", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
-safety_distance_sb = tk.Spinbox(root, from_=0, to=100, increment=1, font=large_font)
-safety_distance_sb.grid(row=6, column=1, padx=20, pady=10)
+ttk.Label(root, text="Select EV Action", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
+road_type_cb = ttk.Combobox(root, values=ev_action, state="readonly", font=large_font)
+road_type_cb.set(default_values["ev_action"])
+road_type_cb.grid(row=6, column=1, padx=20, pady=10)
+
+ttk.Label(root, text="Select EMV Action", font=large_font).grid(row=7, column=0, padx=20, pady=10, sticky=tk.W)
+road_type_cb = ttk.Combobox(root, values=emv_action, state="readonly", font=large_font)
+road_type_cb.set(default_values["emv_action"])
+road_type_cb.grid(row=7, column=1, padx=20, pady=10)
+
+ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=8, column=0, padx=20, pady=10, sticky=tk.W)
+ego_velocity_sb = tk.Spinbox(root, from_=10, to=100, increment=10, font=large_font)
+ego_velocity_sb.grid(row=8, column=1, padx=20, pady=10)
+
+ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=9, column=0, padx=20, pady=10, sticky=tk.W)
+emv_velocity_sb = tk.Spinbox(root, from_=10, to=100, increment=10, font=large_font)
+emv_velocity_sb.grid(row=9, column=1, padx=20, pady=10)
 
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
-start_button.grid(row=7, column=0, columnspan=2, pady=20, ipadx=10)
+start_button.grid(row=10, column=0, pady=20, ipadx=10)
 
-setup_button = ttk.Button(root, text="Activate Autopilot", command=lambda: activate_autopilot(scenario_info["emv_position"]), style='TButton')
-setup_button.grid(row=8, column=0, columnspan=2, pady=10, ipadx=10)
+setup_button = ttk.Button(root, text="Activate Autopilot", command=activate_autopilot_mode, style='TButton')
+setup_button.grid(row=10, column=1, pady=10, ipadx=10)
 
 # Start the main event loop
 root.mainloop()
