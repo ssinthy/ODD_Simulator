@@ -104,7 +104,12 @@ def on_combobox_emv_direction_change(event, combobox_name):
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
         
 def activate_autopilot_mode():
-    activate_autopilot(ego_velocity_sb.get(), emv_velocity_sb.get(), ego_action_cb.get(), emv_action_cb.get())
+    ego_velocity = int(ego_velocity_sb.get())
+    emv_velocity = int(emv_velocity_sb.get())
+    ego_action = ego_action_cb.get()
+    emv_action = emv_action_cb.get()
+    
+    activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action)
     
 # Initialize the main window
 root = tk.Tk()
@@ -162,20 +167,20 @@ emv_action_cb.set(default_values["emv_action"])
 emv_action_cb.grid(row=7, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=8, column=0, padx=20, pady=10, sticky=tk.W)
-ego_velocity_sb = tk.Spinbox(root, from_=10, to=100, increment=10, font=large_font)
+ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
 ego_velocity_sb.grid(row=8, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=9, column=0, padx=20, pady=10, sticky=tk.W)
-emv_velocity_sb = tk.Spinbox(root, from_=10, to=100, increment=10, font=large_font)
+emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
 emv_velocity_sb.grid(row=9, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)
-ego_velocity_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
-ego_velocity_sb.grid(row=10, column=1, padx=20, pady=10)
+emv_long_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
+emv_long_safe_distance_sb.grid(row=10, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=11, column=0, padx=20, pady=10, sticky=tk.W)
-emv_velocity_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
-emv_velocity_sb.grid(row=11, column=1, padx=20, pady=10)
+emv_lat_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
+emv_lat_safe_distance_sb.grid(row=11, column=1, padx=20, pady=10)
 
 start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
 start_button.grid(row=12, column=0, pady=20, ipadx=10)

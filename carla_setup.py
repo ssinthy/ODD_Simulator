@@ -59,7 +59,7 @@ def activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action):
     emv_agent.follow_speed_limits(value=False)
 
     if ego_action == "Go Straight":
-        destination_ego = spawn_points[171].location
+        destination_ego = spawn_points[179].location
         
     if emv_action == "Go Straight":
         destination_emv = spawn_points[180].location
