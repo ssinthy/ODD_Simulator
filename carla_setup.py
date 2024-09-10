@@ -108,7 +108,7 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
     emv_agent.set_destination(destination_emv)
     emv_agent.set_target_speed(emv_velocity)
     emv_agent.ignore_stop_signs(active=True)
-    emv_agent.ignore_vehicles(active=True)
+    # emv_agent.ignore_vehicles(active=True)
     
     
     while True:
