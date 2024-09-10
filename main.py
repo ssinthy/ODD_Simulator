@@ -182,10 +182,10 @@ ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=11, 
 emv_lat_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
 emv_lat_safe_distance_sb.grid(row=11, column=1, padx=20, pady=10)
 
-start_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
+start_button = ttk.Button(root, text="Setup Simulation", command=start_simulation, style='TButton')
 start_button.grid(row=12, column=0, pady=20, ipadx=10)
 
-setup_button = ttk.Button(root, text="Activate Autopilot", command=activate_autopilot_mode, style='TButton')
+setup_button = ttk.Button(root, text="Start Simulation", command=activate_autopilot_mode, style='TButton')
 setup_button.grid(row=12, column=1, pady=10, ipadx=10)
 
 # Start the main event loop

@@ -72,7 +72,7 @@ def activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action):
     
     
     while True:
-        if ego_agent.done():
+        if ego_agent.done() and emv_agent.done():
             print("The target has been reached, stopping the simulation")
             break
         global_ego_vehicle.apply_control(ego_agent.run_step())
