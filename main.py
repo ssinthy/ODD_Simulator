@@ -94,10 +94,8 @@ def on_combobox_emv_action_change(event, combobox_name):
 def activate_autopilot_mode():
     ego_velocity = int(ego_velocity_sb.get())
     emv_velocity = int(emv_velocity_sb.get())
-    ego_action = ego_action_cb.get()
-    emv_action = emv_action_cb.get()
     
-    activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action)
+    activate_autopilot(ego_velocity, emv_velocity, scenario_info)
     
 # Initialize the main window
 root = tk.Tk()

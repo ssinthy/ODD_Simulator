@@ -11,19 +11,14 @@ client = None
 # To import a basic agent
 from agents.navigation.basic_agent import BasicAgent
 
-# To import a behavior agent
-from agents.navigation.behavior_agent import BehaviorAgent
-
 def connect_to_carla():
     global world, client
     client = carla.Client('localhost', 2000)
     client.set_timeout(10.0)
     world = client.load_world("Town03")
 
-# TODO Separate ego vehicle and emv spawning
 def spawn_ego_vehicle(ego_spawn_point = 41):
     global global_ego_vehicle, world
-    # Spawn an emergency vehicle town 5 spawn point 108 / HH map 154
     spawn_points = world.get_map().get_spawn_points()
     vehicle_bp = world.get_blueprint_library().find('vehicle.audi.etron')
     global_ego_vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[ego_spawn_point])
@@ -66,9 +61,21 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
     elif scenario_info["emv_position"] == "Approaches Intersection":
         change_emv_vehicle_spawn_point(69)
 
-def activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action):
-    global global_ego_vehicle, global_emv_vehicle
+def map_destination(scenario_info):
     spawn_points = world.get_map().get_spawn_points()
+
+    if scenario_info["emv_position"] == "Ego Lane" or scenario_info["emv_position"] == "Parallel Lane":
+        if scenario_info["ev_action"] == "Go Straight":
+            destination_ego = spawn_points[180].location
+        
+        if scenario_info["emv_action"] == "Go Straight":
+            destination_emv = spawn_points[179].location
+
+    return destination_ego, destination_emv
+
+
+def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
+    global global_ego_vehicle, global_emv_vehicle
     
     ego_agent = BasicAgent(global_ego_vehicle)
     emv_agent = BasicAgent(global_emv_vehicle)
@@ -78,11 +85,7 @@ def activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action):
     ego_agent.follow_speed_limits(value=False)
     emv_agent.follow_speed_limits(value=False)
 
-    if ego_action == "Go Straight":
-        destination_ego = spawn_points[180].location
-        
-    if emv_action == "Go Straight":
-        destination_emv = spawn_points[179].location
+    destination_ego, destination_emv = map_destination(scenario_info)
     
     ego_agent.set_destination(destination_ego)
     ego_agent.set_target_speed(ego_velocity)
