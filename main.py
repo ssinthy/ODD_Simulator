@@ -48,14 +48,12 @@ def start_simulation():
 def on_combobox_road_type_change(event, combobox_name):
     current_value = event.widget.get()  
     if current_value != scenario_info[combobox_name]:
-        print(f"{combobox_name} changed to {current_value}")
         scenario_info[combobox_name] = current_value 
         
 # Function to handle value changes in comboboxes
 def on_combobox_ego_position_change(event, combobox_name):
     current_value = event.widget.get()  
     if current_value != scenario_info[combobox_name]:
-        print(f"{combobox_name} changed to {current_value}")
         scenario_info[combobox_name] = current_value
         
         if scenario_info[combobox_name] == "Traffic Lane":
@@ -67,7 +65,6 @@ def on_combobox_ego_position_change(event, combobox_name):
 def on_combobox_emv_position_change(event, combobox_name):
     current_value = event.widget.get()  
     if current_value != scenario_info[combobox_name]:
-        print(f"{combobox_name} changed to {current_value}")
         scenario_info[combobox_name] = current_value
         
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
@@ -76,12 +73,23 @@ def on_combobox_emv_position_change(event, combobox_name):
 # Function to handle value changes in comboboxes
 def on_combobox_emv_direction_change(event, combobox_name):
     current_value = event.widget.get()
-    print("scenario_info[combobox_name]", scenario_info[combobox_name])
     if current_value != scenario_info[combobox_name]:
-        print(f"{combobox_name} changed to {current_value}")
         scenario_info[combobox_name] = current_value
         
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
+
+# Function to handle value changes in comboboxes
+def on_combobox_ev_action_change(event, combobox_name):
+    current_value = event.widget.get()
+    if current_value != scenario_info[combobox_name]:
+        scenario_info[combobox_name] = current_value
+
+# Function to handle value changes in comboboxes
+def on_combobox_emv_action_change(event, combobox_name):
+    current_value = event.widget.get()
+    if current_value != scenario_info[combobox_name]:
+        scenario_info[combobox_name] = current_value
+        
         
 def activate_autopilot_mode():
     ego_velocity = int(ego_velocity_sb.get())
@@ -140,11 +148,13 @@ ttk.Label(root, text="Select EV Action", font=large_font).grid(row=6, column=0, 
 ego_action_cb = ttk.Combobox(root, values=ev_action, state="readonly", font=large_font)
 ego_action_cb.set(default_values["ev_action"])
 ego_action_cb.grid(row=6, column=1, padx=20, pady=10)
+ego_action_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_ev_action_change(event, "ev_action"))
 
 ttk.Label(root, text="Select EMV Action", font=large_font).grid(row=7, column=0, padx=20, pady=10, sticky=tk.W)
 emv_action_cb = ttk.Combobox(root, values=emv_action, state="readonly", font=large_font)
 emv_action_cb.set(default_values["emv_action"])
 emv_action_cb.grid(row=7, column=1, padx=20, pady=10)
+emv_action_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_action_change(event, "emv_action"))
 
 ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=8, column=0, padx=20, pady=10, sticky=tk.W)
 ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font, value=30)

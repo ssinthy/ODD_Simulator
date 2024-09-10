@@ -120,9 +120,6 @@ def change_vehicle_position(distance, vehicle_type, action):
     new_transform = carla.Transform(new_location, rotation)
     current_vehicle.set_transform(new_transform)
 
-    # Pause to observe the movement
-    time.sleep(2)
-
 def destroy_ego_vehicle():
     global global_ego_vehicle
 
