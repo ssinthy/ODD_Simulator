@@ -27,26 +27,6 @@ weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain
 time_of_day_options = ["Day time", "Night time"]
 ev_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn Right", "Turn Left", "Turn Right"]
 emv_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn Right", "Turn Left", "Turn Right"]
-    
-def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
-        if  scenario_info["emv_position"] == "Ego Lane":
-            if  scenario_info["emv_direction"] == "Approaches from Behind":
-                change_emv_vehicle_spawn_point(231)
-            elif  scenario_info["emv_direction"] == "As Lead Vehicle":
-                change_emv_vehicle_spawn_point(37)
-        elif scenario_info["emv_position"] == "Parallel Lane":
-            if  scenario_info["emv_direction"] == "Approaches from Behind":
-                change_emv_vehicle_spawn_point(230)
-            elif  scenario_info["emv_direction"] == "As Lead Vehicle":
-                change_emv_vehicle_spawn_point(38)
-        elif scenario_info["emv_position"] == "Opposite Lane":
-            change_emv_vehicle_spawn_point(118)
-        elif scenario_info["emv_position"] == "Cross Road":
-            change_emv_vehicle_spawn_point(68)
-        elif scenario_info["emv_position"] == "Parked":
-            change_emv_vehicle_spawn_point(207)
-        elif scenario_info["emv_position"] == "Approaches Intersection":
-            change_emv_vehicle_spawn_point(69)
 
 # Function to handle the Start Simulation button click
 def start_simulation():
@@ -167,11 +147,11 @@ emv_action_cb.set(default_values["emv_action"])
 emv_action_cb.grid(row=7, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=8, column=0, padx=20, pady=10, sticky=tk.W)
-ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
+ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font, value=30)
 ego_velocity_sb.grid(row=8, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=9, column=0, padx=20, pady=10, sticky=tk.W)
-emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
+emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font, value=30)
 emv_velocity_sb.grid(row=9, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)

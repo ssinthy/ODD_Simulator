@@ -46,6 +46,26 @@ def set_spectator():
     desired_transform = carla.Transform(desired_location, desired_rotation)
     spectator.set_transform(desired_transform)
 
+def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
+    if  scenario_info["emv_position"] == "Ego Lane":
+        if  scenario_info["emv_direction"] == "Approaches from Behind":
+            change_emv_vehicle_spawn_point(213)
+        elif  scenario_info["emv_direction"] == "As Lead Vehicle":
+            change_emv_vehicle_spawn_point(37)
+    elif scenario_info["emv_position"] == "Parallel Lane":
+        if  scenario_info["emv_direction"] == "Approaches from Behind":
+            change_emv_vehicle_spawn_point(230)
+        elif  scenario_info["emv_direction"] == "As Lead Vehicle":
+            change_emv_vehicle_spawn_point(38)
+    elif scenario_info["emv_position"] == "Opposite Lane":
+        change_emv_vehicle_spawn_point(118)
+    elif scenario_info["emv_position"] == "Cross Road":
+        change_emv_vehicle_spawn_point(68)
+    elif scenario_info["emv_position"] == "Parked":
+        change_emv_vehicle_spawn_point(207)
+    elif scenario_info["emv_position"] == "Approaches Intersection":
+        change_emv_vehicle_spawn_point(69)
+
 def activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action):
     global global_ego_vehicle, global_emv_vehicle
     spawn_points = world.get_map().get_spawn_points()
@@ -59,10 +79,10 @@ def activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action):
     emv_agent.follow_speed_limits(value=False)
 
     if ego_action == "Go Straight":
-        destination_ego = spawn_points[179].location
+        destination_ego = spawn_points[180].location
         
     if emv_action == "Go Straight":
-        destination_emv = spawn_points[180].location
+        destination_emv = spawn_points[179].location
     
     ego_agent.set_destination(destination_ego)
     ego_agent.set_target_speed(ego_velocity)
@@ -78,7 +98,7 @@ def activate_autopilot(ego_velocity, emv_velocity, ego_action, emv_action):
         global_ego_vehicle.apply_control(ego_agent.run_step())
         global_emv_vehicle.apply_control(emv_agent.run_step())
         
-def change_vehicle_position(distance, vehicle_type):
+def change_vehicle_position(distance, vehicle_type, action):
     global global_ego_vehicle, global_emv_vehicle
     
     current_vehicle = global_emv_vehicle if vehicle_type != "ego" else global_ego_vehicle
