@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import threading
 
 from carla_setup import *
 
@@ -29,8 +30,8 @@ ev_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn R
 emv_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn Right", "Turn Left", "Turn Right"]
 
 # Function to handle the Start Simulation button click
-def start_simulation():
-    
+def set_up_simulation():
+    global scenario_info
     connect_to_carla()
     
     spawn_ego_vehicle()
@@ -39,10 +40,14 @@ def start_simulation():
     
     set_spectator()
 
+    scenario_info = default_values.copy()
+
     road_type_cb.set(default_values["road_type"])
     ego_vehicle_position_cb.set(default_values["ego_vehicle_position"])
     emv_position_cb.set(default_values["emv_position"])
     emv_direction_cb.set(default_values["emv_direction"])
+    ego_action_cb.set(default_values["ev_action"])
+    emv_action_cb.set(default_values["emv_action"])
 
 # Function to handle value changes in comboboxes
 def on_combobox_road_type_change(event, combobox_name):
@@ -91,7 +96,7 @@ def on_combobox_emv_action_change(event, combobox_name):
         scenario_info[combobox_name] = current_value
         
         
-def activate_autopilot_mode():
+def start_simulation():
     ego_velocity = int(ego_velocity_sb.get())
     emv_velocity = int(emv_velocity_sb.get())
     
@@ -155,11 +160,11 @@ emv_action_cb.grid(row=7, column=1, padx=20, pady=10)
 emv_action_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_action_change(event, "emv_action"))
 
 ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=8, column=0, padx=20, pady=10, sticky=tk.W)
-ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font, value=30)
+ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
 ego_velocity_sb.grid(row=8, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=9, column=0, padx=20, pady=10, sticky=tk.W)
-emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font, value=30)
+emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
 emv_velocity_sb.grid(row=9, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)
@@ -170,10 +175,10 @@ ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=11, 
 emv_lat_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
 emv_lat_safe_distance_sb.grid(row=11, column=1, padx=20, pady=10)
 
-start_button = ttk.Button(root, text="Setup Simulation", command=start_simulation, style='TButton')
+start_button = ttk.Button(root, text="Setup Simulation", command=set_up_simulation, style='TButton')
 start_button.grid(row=12, column=0, pady=20, ipadx=10)
 
-setup_button = ttk.Button(root, text="Start Simulation", command=activate_autopilot_mode, style='TButton')
+setup_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
 setup_button.grid(row=12, column=1, pady=10, ipadx=10)
 
 # Start the main event loop

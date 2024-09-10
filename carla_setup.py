@@ -27,7 +27,7 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     global global_emv_vehicle, world, client
     spawn_points = world.get_map().get_spawn_points()
     
-    emergency_bp = world.get_blueprint_library().find('vehicle.ford.ambulance')
+    emergency_bp = world.get_blueprint_library().find('vehicle.dodge.charger_police_2020')
     global_emv_vehicle = world.spawn_actor(emergency_bp, spawn_points[emv_spawn_point])
     
     # Turn on the vehicle's (emergency lights)
@@ -44,7 +44,7 @@ def set_spectator():
 def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
     if  scenario_info["emv_position"] == "Ego Lane":
         if  scenario_info["emv_direction"] == "Approaches from Behind":
-            change_emv_vehicle_spawn_point(213)
+            change_emv_vehicle_spawn_point(231)
         elif  scenario_info["emv_direction"] == "As Lead Vehicle":
             change_emv_vehicle_spawn_point(37)
     elif scenario_info["emv_position"] == "Parallel Lane":
@@ -55,7 +55,7 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
     elif scenario_info["emv_position"] == "Opposite Lane":
         change_emv_vehicle_spawn_point(118)
     elif scenario_info["emv_position"] == "Cross Road":
-        change_emv_vehicle_spawn_point(68)
+        change_emv_vehicle_spawn_point(157)
     elif scenario_info["emv_position"] == "Parked":
         change_emv_vehicle_spawn_point(207)
     elif scenario_info["emv_position"] == "Approaches Intersection":
@@ -64,11 +64,26 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
 def map_destination(scenario_info):
     spawn_points = world.get_map().get_spawn_points()
 
-    if scenario_info["emv_position"] == "Ego Lane" or scenario_info["emv_position"] == "Parallel Lane":
-        if scenario_info["ev_action"] == "Go Straight":
-            destination_ego = spawn_points[180].location
-        
+    if scenario_info["ev_action"] == "Go Straight":
+        destination_ego = spawn_points[180].location
+    elif scenario_info["ev_action"] == "Go Straight and Turn Left" or scenario_info["ev_action"] == "Turn Left":
+        destination_ego = spawn_points[87].location
+    elif scenario_info["ev_action"] == "Go Straight and Turn Right" or scenario_info["ev_action"] == "Turn Right":
+        destination_ego = spawn_points[35].location
+
+    if  scenario_info["emv_position"] == "Ego Lane" or scenario_info["emv_position"] == "Parallel Lane":
         if scenario_info["emv_action"] == "Go Straight":
+            destination_emv = spawn_points[179].location
+        elif scenario_info["emv_action"] == "Go Straight and Turn Left":
+            destination_emv = spawn_points[88].location
+        elif scenario_info["emv_action"] == "Go Straight and Turn Right":
+            destination_emv = spawn_points[36].location
+    elif  scenario_info["emv_position"] == "Approaches Intersection" or scenario_info["emv_position"] == "Cross Road":
+        if scenario_info["emv_action"] == "Go Straight":
+            destination_emv = spawn_points[88].location
+        elif scenario_info["emv_action"] == "Turn Left":
+            destination_emv = spawn_points[68].location
+        elif scenario_info["emv_action"] == "Turn Right":
             destination_emv = spawn_points[179].location
 
     return destination_ego, destination_emv
@@ -81,7 +96,7 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
     emv_agent = BasicAgent(global_emv_vehicle)
     ego_agent.ignore_traffic_lights(active=True)
     emv_agent.ignore_traffic_lights(active=True)
-    
+
     ego_agent.follow_speed_limits(value=False)
     emv_agent.follow_speed_limits(value=False)
 
@@ -91,7 +106,9 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
     ego_agent.set_target_speed(ego_velocity)
     
     emv_agent.set_destination(destination_emv)
-    emv_agent.set_target_speed(emv_velocity) # km/h
+    emv_agent.set_target_speed(emv_velocity)
+    emv_agent.ignore_stop_signs(active=True)
+    emv_agent.ignore_vehicles(active=True)
     
     
     while True:
