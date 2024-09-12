@@ -96,7 +96,7 @@ def start_simulation():
     ego_velocity = int(ego_velocity_sb.get())
     emv_velocity = int(emv_velocity_sb.get())
     
-    activate_autopilot(ego_velocity, emv_velocity, scenario_info)
+    threading.Thread(target=activate_autopilot, args=[ego_velocity, emv_velocity, scenario_info]).start()
     
 # Initialize the main window
 root = tk.Tk()
