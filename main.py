@@ -110,6 +110,13 @@ large_font = ("Helvetica", 14)
 style = ttk.Style()
 style.configure('TButton', font=large_font)
 
+# Create a Frame to hold the buttons
+button_frame_ev = tk.Frame(root)
+button_frame_ev.grid(row=4, column=1, padx=10, pady=10)
+
+button_frame_emv = tk.Frame(root)
+button_frame_emv.grid(row=5, column=1, padx=10, pady=10) 
+
 # Create and place the widgets
 ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20, pady=10, sticky=tk.W)
 road_type_cb = ttk.Combobox(root, values=road_type_options, state="readonly", font=large_font)
@@ -135,12 +142,16 @@ emv_direction_cb.grid(row=3, column=1, padx=20, pady=10)
 emv_direction_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_direction_change(event, "emv_direction"))
 
 ttk.Label(root, text="Change EV Position", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
-change_ev_position_btn_5m = ttk.Button(root, text="Move forward +5m", command=lambda: change_vehicle_position(5, "ego"), style='TButton')
-change_ev_position_btn_5m.grid(row=4, column=1, columnspan=2, pady=20, ipadx=10)
+change_ev_position_btn = ttk.Button(button_frame_ev, text="Move +5m", command=lambda: change_vehicle_position(5, "ego", "forward"), style='TButton')
+change_ev_position_bw_btn = ttk.Button(button_frame_ev, text="Move -5m", command=lambda: change_vehicle_position(5, "ego", "backward"), style='TButton')
+change_ev_position_btn.pack(side='left', padx=1)
+change_ev_position_bw_btn.pack(side='left', padx=1)
 
 ttk.Label(root, text="Change EMV Position", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
-change_emv_position_btn = ttk.Button(root, text="Move forward +5m", command=lambda: change_vehicle_position(5, "emv"), style='TButton')
-change_emv_position_btn.grid(row=5, column=1, columnspan=2, pady=20, ipadx=10)
+change_emv_position_btn = ttk.Button(button_frame_emv, text="Move +5m", command=lambda: change_vehicle_position(5, "emv", "forward"), style='TButton')
+change_emv_position_bw_btn = ttk.Button(button_frame_emv, text="Move -5m", command=lambda: change_vehicle_position(5, "emv", "backward"), style='TButton')
+change_emv_position_btn.pack(side='left', padx=1)
+change_emv_position_bw_btn.pack(side='left', padx=1)
 
 ttk.Label(root, text="Select EV Action", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
 ego_action_cb = ttk.Combobox(root, values=ev_action, state="readonly", font=large_font)

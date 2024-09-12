@@ -60,7 +60,7 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
     elif scenario_info["emv_position"] == "Approaches Intersection":
         change_emv_vehicle_spawn_point(69)
         
-def change_vehicle_position(distance, vehicle_type):
+def change_vehicle_position(distance, vehicle_type, action):
     global global_ego_vehicle, global_emv_vehicle
     
     current_vehicle = global_emv_vehicle if vehicle_type != "ego" else global_ego_vehicle
@@ -70,13 +70,16 @@ def change_vehicle_position(distance, vehicle_type):
     rotation = transform.rotation
 
     # Calculate the forward offset based on the vehicle's rotation
-    forward_distance = distance  # Distance to move forward (1 meter)
     rad_yaw = math.radians(rotation.yaw)  # Convert yaw to radians
 
-    # Update location to move 1 meter forward
-    new_x = location.x + forward_distance * math.cos(rad_yaw)
-    new_y = location.y + forward_distance * math.sin(rad_yaw)
-    new_location = carla.Location(new_x, new_y, location.z)
+    if action == "forward":
+        new_x = location.x + distance * math.cos(rad_yaw)
+        new_y = location.y + distance * math.sin(rad_yaw)
+        new_location = carla.Location(new_x, new_y, location.z)
+    elif action == "backward":
+        new_x = location.x - distance * math.cos(rad_yaw)
+        new_y = location.y - distance * math.sin(rad_yaw)
+        new_location = carla.Location(new_x, new_y, location.z)
 
     # Set the new transform with the updated location
     new_transform = carla.Transform(new_location, rotation)
