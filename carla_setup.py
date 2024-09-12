@@ -91,7 +91,7 @@ def map_destination(scenario_info):
     if scenario_info["ev_action"] == "Go Straight":
         destination_ego = spawn_points[180].location
     elif scenario_info["ev_action"] == "Go Straight and Turn Left" or scenario_info["ev_action"] == "Turn Left":
-        destination_ego = spawn_points[87].location
+        destination_ego = carla.Location(x=86.572197, y=133.357605, z=0.078843)
     elif scenario_info["ev_action"] == "Go Straight and Turn Right" or scenario_info["ev_action"] == "Turn Right":
         destination_ego = spawn_points[35].location
 
@@ -99,12 +99,12 @@ def map_destination(scenario_info):
         if scenario_info["emv_action"] == "Go Straight":
             destination_emv = spawn_points[179].location
         elif scenario_info["emv_action"] == "Go Straight and Turn Left":
-            destination_emv = spawn_points[88].location
+            destination_emv = carla.Location(x=100, y=133.357605, z=0.078843)
         elif scenario_info["emv_action"] == "Go Straight and Turn Right":
             destination_emv = spawn_points[36].location
     elif  scenario_info["emv_position"] == "Approaches Intersection" or scenario_info["emv_position"] == "Cross Road":
         if scenario_info["emv_action"] == "Go Straight":
-            destination_emv = spawn_points[88].location
+            destination_emv = carla.Location(x=100, y=133.357605, z=0.078843)
         elif scenario_info["emv_action"] == "Turn Left":
             destination_emv = spawn_points[68].location
         elif scenario_info["emv_action"] == "Turn Right":
@@ -154,13 +154,12 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
     emv_agent.set_destination(destination_emv)
     emv_agent.set_target_speed(emv_velocity)
     emv_agent.ignore_stop_signs(active=True)
-    # emv_agent.ignore_vehicles(active=True)
     
     
     while True:
         if ego_velocity == 0 and emv_velocity == 0:
             break
-        if ego_agent.done() and emv_agent.done():
+        if ego_agent.done():
             print("The target has been reached, stopping the simulation")
             break
         global_ego_vehicle.apply_control(ego_agent.run_step())
