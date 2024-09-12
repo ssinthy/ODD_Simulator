@@ -115,7 +115,7 @@ button_frame_ev = tk.Frame(root)
 button_frame_ev.grid(row=4, column=1, padx=10, pady=10)
 
 button_frame_emv = tk.Frame(root)
-button_frame_emv.grid(row=5, column=1, padx=10, pady=10) 
+button_frame_emv.grid(row=5, column=1, padx=10, pady=10)
 
 # Create and place the widgets
 ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20, pady=10, sticky=tk.W)
