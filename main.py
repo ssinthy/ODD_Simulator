@@ -10,8 +10,6 @@ default_values = {
     "ego_vehicle_position": "Traffic Lane",
     "emv_position": "Ego Lane",
     "emv_direction": "Approaches from Behind",
-    "weather_condition": "Clear",
-    "time_of_day": "Day time",
     "ev_action": "Go Straight",
     "emv_action": "Go Straight"
 }
@@ -22,10 +20,8 @@ scenario_info = default_values.copy()
 # Define the options for each combobox
 road_type_options = ["Motorway"]
 ego_vehicle_position_options = ["Traffic Lane", "Approaching Intersection"]
-emv_position_options = ["Ego Lane", "Parallel Lane", "Opposite Lane", "Cross Road", "Parked", "Approaches Intersection"]
+emv_position_options = ["Ego Lane", "Parallel Lane", "Opposite Lane", "Cross Road", "Approaches Intersection", "Parked"]
 emv_direction_options = ["Approaches from Behind", "As Lead Vehicle"]
-weather_options = ["Clear", "Cloudy", "Light Rain", "Moderate Rain", "Heavy Rain"]
-time_of_day_options = ["Day time", "Night time"]
 ev_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn Right", "Turn Left", "Turn Right"]
 emv_action = ["Go Straight", "Go Straight and Turn Left", "Go Straight and Turn Right", "Turn Left", "Turn Right"]
 
@@ -47,13 +43,7 @@ def set_up_simulation():
     emv_position_cb.set(default_values["emv_position"])
     emv_direction_cb.set(default_values["emv_direction"])
     ego_action_cb.set(default_values["ev_action"])
-    emv_action_cb.set(default_values["emv_action"])
-
-# Function to handle value changes in comboboxes
-def on_combobox_road_type_change(event, combobox_name):
-    current_value = event.widget.get()  
-    if current_value != scenario_info[combobox_name]:
-        scenario_info[combobox_name] = current_value 
+    emv_action_cb.set(default_values["emv_action"]) 
         
 # Function to handle value changes in comboboxes
 def on_combobox_ego_position_change(event, combobox_name):
@@ -119,7 +109,6 @@ ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20
 road_type_cb = ttk.Combobox(root, values=road_type_options, state="readonly", font=large_font)
 road_type_cb.set(default_values["road_type"])
 road_type_cb.grid(row=0, column=1, padx=20, pady=10)
-road_type_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_road_type_change(event, "road_type"))
 
 ttk.Label(root, text="Ego Vehicle Position", font=large_font).grid(row=1, column=0, padx=20, pady=10, sticky=tk.W)
 ego_vehicle_position_cb = ttk.Combobox(root, values=ego_vehicle_position_options, state="readonly", font=large_font)
