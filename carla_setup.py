@@ -1,7 +1,6 @@
 import carla
 import time
 import math
-import random
 
 global_ego_vehicle = None
 global_emv_vehicle = None
@@ -60,6 +59,28 @@ def map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info):
         change_emv_vehicle_spawn_point(207)
     elif scenario_info["emv_position"] == "Approaches Intersection":
         change_emv_vehicle_spawn_point(69)
+        
+def change_vehicle_position(distance, vehicle_type):
+    global global_ego_vehicle, global_emv_vehicle
+    
+    current_vehicle = global_emv_vehicle if vehicle_type != "ego" else global_ego_vehicle
+    
+    transform = current_vehicle.get_transform()
+    location = transform.location
+    rotation = transform.rotation
+
+    # Calculate the forward offset based on the vehicle's rotation
+    forward_distance = distance  # Distance to move forward (1 meter)
+    rad_yaw = math.radians(rotation.yaw)  # Convert yaw to radians
+
+    # Update location to move 1 meter forward
+    new_x = location.x + forward_distance * math.cos(rad_yaw)
+    new_y = location.y + forward_distance * math.sin(rad_yaw)
+    new_location = carla.Location(new_x, new_y, location.z)
+
+    # Set the new transform with the updated location
+    new_transform = carla.Transform(new_location, rotation)
+    current_vehicle.set_transform(new_transform)
 
 def map_destination(scenario_info):
     spawn_points = world.get_map().get_spawn_points()
@@ -85,8 +106,30 @@ def map_destination(scenario_info):
             destination_emv = spawn_points[68].location
         elif scenario_info["emv_action"] == "Turn Right":
             destination_emv = spawn_points[179].location
+    elif scenario_info["emv_position"] == "Parked":
+        destination_emv = spawn_points[207].location
 
     return destination_ego, destination_emv
+
+def destroy_ego_vehicle():
+    global global_ego_vehicle
+
+    if global_ego_vehicle != None:
+        global_ego_vehicle.destroy()
+
+def destroy_emv_vehicle():
+    global global_emv_vehicle
+
+    if global_emv_vehicle != None:
+        global_emv_vehicle.destroy()
+    
+def change_ego_vehicle_spawn_point(ego_spawn_point):
+    destroy_ego_vehicle()
+    spawn_ego_vehicle(ego_spawn_point)
+    
+def change_emv_vehicle_spawn_point(emv_spawn_point):
+    destroy_emv_vehicle()
+    spawn_emergency_vehicle(emv_spawn_point)
 
 
 def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
@@ -118,44 +161,3 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
         global_ego_vehicle.apply_control(ego_agent.run_step())
         global_emv_vehicle.apply_control(emv_agent.run_step())
         
-def change_vehicle_position(distance, vehicle_type, action):
-    global global_ego_vehicle, global_emv_vehicle
-    
-    current_vehicle = global_emv_vehicle if vehicle_type != "ego" else global_ego_vehicle
-    
-    transform = current_vehicle.get_transform()
-    location = transform.location
-    rotation = transform.rotation
-
-    # Calculate the forward offset based on the vehicle's rotation
-    forward_distance = distance  # Distance to move forward (1 meter)
-    rad_yaw = math.radians(rotation.yaw)  # Convert yaw to radians
-
-    # Update location to move 1 meter forward
-    new_x = location.x + forward_distance * math.cos(rad_yaw)
-    new_y = location.y + forward_distance * math.sin(rad_yaw)
-    new_location = carla.Location(new_x, new_y, location.z)
-
-    # Set the new transform with the updated location
-    new_transform = carla.Transform(new_location, rotation)
-    current_vehicle.set_transform(new_transform)
-
-def destroy_ego_vehicle():
-    global global_ego_vehicle
-
-    if global_ego_vehicle != None:
-        global_ego_vehicle.destroy()
-
-def destroy_emv_vehicle():
-    global global_emv_vehicle
-
-    if global_emv_vehicle != None:
-        global_emv_vehicle.destroy()
-    
-def change_ego_vehicle_spawn_point(ego_spawn_point):
-    destroy_ego_vehicle()
-    spawn_ego_vehicle(ego_spawn_point)
-    
-def change_emv_vehicle_spawn_point(emv_spawn_point):
-    destroy_emv_vehicle()
-    spawn_emergency_vehicle(emv_spawn_point)

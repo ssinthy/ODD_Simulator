@@ -62,6 +62,12 @@ def on_combobox_emv_position_change(event, combobox_name):
     if current_value != scenario_info[combobox_name]:
         scenario_info[combobox_name] = current_value
         
+        if current_value == "Approaches Intersection":
+            emv_direction_cb.set("")
+        if current_value == "Parked":
+            emv_direction_cb.set("")
+            emv_action_cb.set("")
+            
         map_scenario_for_motorway_same_lane_and_parallel_lane(scenario_info)
             
                     
