@@ -31,7 +31,11 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     
     # Turn on the vehicle's (emergency lights)
     from carla import VehicleLightState as vls
-    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))   
+    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))
+    
+def getVehicles():
+    global global_emv_vehicle, world, global_ego_vehicle
+    return global_ego_vehicle, global_emv_vehicle, world   
     
 def set_spectator():
     desired_location = carla.Location(x=10.029333, y=197.808701, z=102.078331)
