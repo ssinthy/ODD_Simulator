@@ -54,7 +54,7 @@ def on_combobox_ego_position_change(event, combobox_name):
         if scenario_info[combobox_name] == "Traffic Lane":
             change_ego_vehicle_spawn_point(41)
         elif  scenario_info[combobox_name] == "Approaching Intersection":
-            change_ego_vehicle_spawn_point(38)
+            change_ego_vehicle_spawn_point(37)
         
 # Function to handle value changes in comboboxes
 def on_combobox_emv_position_change(event, combobox_name):
