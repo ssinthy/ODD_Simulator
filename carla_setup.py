@@ -13,7 +13,7 @@ client = None
 # To import a basic agent
 from agents.navigation.basic_agent import BasicAgent
 
-stop_event = threading.Event()
+stop_event_odd_monitoring = threading.Event()
 
 def connect_to_carla():
     global world, client
@@ -166,14 +166,14 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
             break
         if ego_agent.done():
             print("The target has been reached, stopping the simulation")
-            stop_event.set()
+            stop_event_odd_monitoring.set()
             break
         global_ego_vehicle.apply_control(ego_agent.run_step())
         global_emv_vehicle.apply_control(emv_agent.run_step())
         
 def monitor_odd():
     global global_emv_vehicle, world, global_ego_vehicle
-    stop_event.clear()
+    stop_event_odd_monitoring.clear()
 
     if global_ego_vehicle is None:
         return    
@@ -182,10 +182,10 @@ def monitor_odd():
     map = world.get_map()
 
     while True:
-        if stop_event.is_set():
+        if stop_event_odd_monitoring.is_set():
             break
         
-        time.sleep(0.5)
+        time.sleep(0.3)
          # Get the current location of the vehicle
         ego_vehicle_location = global_ego_vehicle.get_location()
         emergency_vehicle_location = global_emv_vehicle.get_location()
@@ -236,11 +236,6 @@ def monitor_odd():
 
         if is_within_odd:
             print("Inside ODD")
-            world.debug.draw_string(ego_vehicle_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.5)
-            bbox = global_ego_vehicle.bounding_box
-            bbox.location += global_ego_vehicle.get_transform().location
-            # Draw the bounding box
-            world.debug.draw_box(bbox, global_ego_vehicle.get_transform().rotation, thickness=0.1, color=carla.Color(255, 0, 0, 0), life_time=0.5)
         else:
             print("Outside ODD")
             world.debug.draw_string(ego_vehicle_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.5)
