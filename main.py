@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 import threading
-from odd_monitoring import set_lan_lon_safe_distance
 
 from carla_setup import *
 
@@ -95,13 +94,13 @@ def on_combobox_emv_action_change(event, combobox_name):
 def start_simulation():
     ego_velocity = int(ego_velocity_sb.get())
     emv_velocity = int(emv_velocity_sb.get())
-
-    set_lan_lon_safe_distance(int(long_safe_distance_sb.get()), int(lat_safe_distance_sb.get()))
+    log_safe_distance = int(long_safe_distance_sb.get())
+    lat_safe_distance = int(lat_safe_distance_sb.get())
     
-    threading.Thread(target=monitor_odd).start()
+    threading.Thread(target=monitor_odd, args=[log_safe_distance, lat_safe_distance]).start()
     threading.Thread(target=activate_autopilot, args=[ego_velocity, emv_velocity, scenario_info]).start()
     
-# Initialize the main window
+# Initialize the main window and GUI setup
 root = tk.Tk()
 root.title("ScenarioInfoManager")
 root.geometry("600x700")  # Set the window size
