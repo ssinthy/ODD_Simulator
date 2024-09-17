@@ -1,6 +1,9 @@
 import carla
 import time
 import math
+import threading
+
+from odd_monitoring import *
 
 global_ego_vehicle = None
 global_emv_vehicle = None
@@ -9,6 +12,8 @@ client = None
 
 # To import a basic agent
 from agents.navigation.basic_agent import BasicAgent
+
+stop_event = threading.Event()
 
 def connect_to_carla():
     global world, client
@@ -31,11 +36,7 @@ def spawn_emergency_vehicle(emv_spawn_point = 231):
     
     # Turn on the vehicle's (emergency lights)
     from carla import VehicleLightState as vls
-    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))
-    
-def getVehicles():
-    global global_emv_vehicle, world, global_ego_vehicle
-    return global_ego_vehicle, global_emv_vehicle, world   
+    global_emv_vehicle.set_light_state(carla.VehicleLightState(vls.Special1))  
     
 def set_spectator():
     desired_location = carla.Location(x=10.029333, y=197.808701, z=102.078331)
@@ -165,7 +166,86 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
             break
         if ego_agent.done():
             print("The target has been reached, stopping the simulation")
+            stop_event.set()
             break
         global_ego_vehicle.apply_control(ego_agent.run_step())
         global_emv_vehicle.apply_control(emv_agent.run_step())
         
+def monitor_odd():
+    global global_emv_vehicle, world, global_ego_vehicle
+    stop_event.clear()
+
+    if global_ego_vehicle is None:
+        return    
+    if global_emv_vehicle is None:
+        return
+    map = world.get_map()
+
+    while True:
+        if stop_event.is_set():
+            break
+        
+        time.sleep(0.5)
+         # Get the current location of the vehicle
+        ego_vehicle_location = global_ego_vehicle.get_location()
+        emergency_vehicle_location = global_emv_vehicle.get_location()
+        # TODO: get road id
+        # Get the road ID and check if it's a junction for ego vehicle
+        waypoint_ego = map.get_waypoint(ego_vehicle_location)
+
+        # Get the road ID and check if it's a junction for emv vehicle
+        waypoint_emv = map.get_waypoint(emergency_vehicle_location)
+
+        # Get ego vehicle velocity
+        ego_vehicle_velocity = get_speed(global_ego_vehicle)
+
+        # Get emergency vehicle velocity
+        emergency_vehicle_velocity = get_speed(global_emv_vehicle)
+
+        emv_relative_pos = "on_other_road"
+
+        if waypoint_emv.is_junction:
+            emv_relative_pos = "on_junction"
+
+        if waypoint_ego.road_id == waypoint_emv.road_id:
+            # Check the condition and set lane_type if condition is true
+            if is_emv_in_same_directional_lane(waypoint_ego, waypoint_emv):
+                emv_relative_pos = "subject_lane"
+            else:
+                emv_relative_pos = "opposite_lane"
+
+        distance_between_ego_and_emv = calculate_distance(ego_vehicle_location, emergency_vehicle_location)
+
+        # Construct avdata from road info. Include all necessary information in avdata
+        avdata = {
+            Taxonomy.EGO_VEHICLE: {
+                Taxonomy.SPEED: round(ego_vehicle_velocity, 2)
+            },
+            Taxonomy.EMERGENCY_VEHICLE: {
+                Taxonomy.SPEED: round(emergency_vehicle_velocity, 2),
+                Taxonomy.DISTANCE: round(distance_between_ego_and_emv, 2),
+                Taxonomy.RELATIVE_POSITION: emv_relative_pos
+            }
+        }
+
+        print(avdata)
+
+        # Evaluate the avdata against ODD
+
+        is_within_odd = odd.check_within_odd(avdata)
+
+        if is_within_odd:
+            print("Inside ODD")
+            world.debug.draw_string(ego_vehicle_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.5)
+            bbox = global_ego_vehicle.bounding_box
+            bbox.location += global_ego_vehicle.get_transform().location
+            # Draw the bounding box
+            world.debug.draw_box(bbox, global_ego_vehicle.get_transform().rotation, thickness=0.1, color=carla.Color(255, 0, 0, 0), life_time=0.5)
+        else:
+            print("Outside ODD")
+            world.debug.draw_string(ego_vehicle_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.5)
+            bbox = global_ego_vehicle.bounding_box
+            bbox.location += global_ego_vehicle.get_transform().location
+
+            # Draw the bounding box
+            world.debug.draw_box(bbox, global_ego_vehicle.get_transform().rotation, thickness=0.1, color=carla.Color(255, 0, 0, 0), life_time=0.5)

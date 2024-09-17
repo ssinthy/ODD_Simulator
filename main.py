@@ -3,7 +3,6 @@ from tkinter import ttk
 import threading
 
 from carla_setup import *
-from odd_monitoring import monitor_odd
 
 # Default values for each field
 default_values = {
@@ -97,9 +96,7 @@ def start_simulation():
     ego_velocity = int(ego_velocity_sb.get())
     emv_velocity = int(emv_velocity_sb.get())
     
-    ego, emv, world = getVehicles()
-    
-    threading.Thread(target=monitor_odd, args=[ego, emv, world]).start()
+    threading.Thread(target=monitor_odd).start()
     threading.Thread(target=activate_autopilot, args=[ego_velocity, emv_velocity, scenario_info]).start()
     
 # Initialize the main window
