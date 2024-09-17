@@ -150,6 +150,7 @@ def stop_simulation():
 def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
     global global_ego_vehicle, global_emv_vehicle
 
+    # Reset the event
     stop_event_simulation.clear()
     
     ego_agent = BasicAgent(global_ego_vehicle)
@@ -179,6 +180,7 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
             break
         if ego_agent.done():
             print("The target has been reached, stopping the simulation")
+            # Signal the worker thread to stop
             stop_event_odd_monitoring.set()
             break
         global_ego_vehicle.apply_control(ego_agent.run_step())
@@ -186,20 +188,23 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
         
 def monitor_odd():
     global global_emv_vehicle, world, global_ego_vehicle
+
+    # Reset the event
     stop_event_odd_monitoring.clear()
 
     map = world.get_map()
 
     while True:
-        time.sleep(0.3)
+        time.sleep(0.1)
         if global_ego_vehicle is None or global_emv_vehicle is None:
             break   
         if stop_event_odd_monitoring.is_set() or stop_event_simulation.is_set():
             break
+
          # Get the current location of the vehicle
         ego_vehicle_location = global_ego_vehicle.get_location()
         emergency_vehicle_location = global_emv_vehicle.get_location()
-        # TODO: get road id
+       
         # Get the road ID and check if it's a junction for ego vehicle
         waypoint_ego = map.get_waypoint(ego_vehicle_location)
 
@@ -248,9 +253,9 @@ def monitor_odd():
             print("Inside ODD")
         else:
             print("Outside ODD")
-            world.debug.draw_string(ego_vehicle_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.5)
+            world.debug.draw_string(ego_vehicle_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.1)
             bbox = global_ego_vehicle.bounding_box
             bbox.location += global_ego_vehicle.get_transform().location
 
             # Draw the bounding box
-            world.debug.draw_box(bbox, global_ego_vehicle.get_transform().rotation, thickness=0.1, color=carla.Color(255, 0, 0, 0), life_time=0.5)
+            world.debug.draw_box(bbox, global_ego_vehicle.get_transform().rotation, thickness=0.1, color=carla.Color(255, 0, 0, 0), life_time=0.1)
