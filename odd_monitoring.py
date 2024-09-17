@@ -58,6 +58,9 @@ def is_emv_in_same_directional_lane(waypoint1, waypoint2):
     return ((waypoint1.lane_id < 0 and waypoint2.lane_id < 0) or
             (waypoint1.lane_id > 0 and waypoint2.lane_id > 0))
 
+def is_emv_in_on_ego_lane(waypoint1, waypoint2):
+    return waypoint1.lane_id == waypoint2.lane_id
+
 def get_speed(vehicle):
     velocity = vehicle.get_velocity()
     # Calculate the magnitude of the velocity vector (speed)

@@ -225,7 +225,10 @@ def monitor_odd():
         if waypoint_ego.road_id == waypoint_emv.road_id:
             # Check the condition and set lane_type if condition is true
             if is_emv_in_same_directional_lane(waypoint_ego, waypoint_emv):
-                emv_relative_pos = "subject_lane"
+                if is_emv_in_on_ego_lane(waypoint_ego, waypoint_emv):
+                    emv_relative_pos = "subject_lane"
+                else:
+                    emv_relative_pos = "parallel lane"
             else:
                 emv_relative_pos = "opposite_lane"
 
