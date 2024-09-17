@@ -25,7 +25,8 @@ def get_speed(vehicle):
     velocity = vehicle.get_velocity()
     # Calculate the magnitude of the velocity vector (speed)
     speed = math.sqrt(velocity.x**2 + velocity.y**2 + velocity.z**2)
-    return speed
+    # convert speed from m/s to km/h
+    return speed * 3.6
 
 def monitor_odd(ego_vehicle, emergency_vehicle, world):
     if ego_vehicle is None:
