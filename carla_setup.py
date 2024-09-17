@@ -14,6 +14,7 @@ client = None
 from agents.navigation.basic_agent import BasicAgent
 
 stop_event_odd_monitoring = threading.Event()
+stop_event_simulation = threading.Event()
 
 def connect_to_carla():
     global world, client
@@ -139,9 +140,17 @@ def change_emv_vehicle_spawn_point(emv_spawn_point):
     destroy_emv_vehicle()
     spawn_emergency_vehicle(emv_spawn_point)
 
+def stop_simulation():
+    stop_event_simulation.set()
+    stop_event_odd_monitoring.set()
+    destroy_ego_vehicle()
+    destroy_emv_vehicle()
+
 
 def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
     global global_ego_vehicle, global_emv_vehicle
+
+    stop_event_simulation.clear()
     
     ego_agent = BasicAgent(global_ego_vehicle)
     emv_agent = BasicAgent(global_emv_vehicle)
@@ -162,6 +171,10 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
     
     
     while True:
+        if global_ego_vehicle is None or global_emv_vehicle is None:
+            break
+        if stop_event_odd_monitoring.is_set() or stop_event_simulation.is_set():
+            break
         if ego_velocity == 0 and emv_velocity == 0:
             break
         if ego_agent.done():
@@ -175,17 +188,14 @@ def monitor_odd():
     global global_emv_vehicle, world, global_ego_vehicle
     stop_event_odd_monitoring.clear()
 
-    if global_ego_vehicle is None:
-        return    
-    if global_emv_vehicle is None:
-        return
     map = world.get_map()
 
     while True:
-        if stop_event_odd_monitoring.is_set():
-            break
-        
         time.sleep(0.3)
+        if global_ego_vehicle is None or global_emv_vehicle is None:
+            break   
+        if stop_event_odd_monitoring.is_set() or stop_event_simulation.is_set():
+            break
          # Get the current location of the vehicle
         ego_vehicle_location = global_ego_vehicle.get_location()
         emergency_vehicle_location = global_emv_vehicle.get_location()

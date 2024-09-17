@@ -182,11 +182,14 @@ ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=11, 
 emv_lat_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
 emv_lat_safe_distance_sb.grid(row=11, column=1, padx=20, pady=10)
 
-start_button = ttk.Button(root, text="Setup Simulation", command=set_up_simulation, style='TButton')
-start_button.grid(row=12, column=0, pady=20, ipadx=10)
+setup_button = ttk.Button(root, text="Setup", command=set_up_simulation, style='TButton')
+setup_button.grid(row=12, column=0, padx=5, pady=20)
 
-setup_button = ttk.Button(root, text="Start Simulation", command=start_simulation, style='TButton')
-setup_button.grid(row=12, column=1, pady=10, ipadx=10)
+start_button = ttk.Button(root, text="Start", command=start_simulation, style='TButton')
+start_button.grid(row=12, column=0, columnspan=2, padx=5, pady=20)
 
+stop_button = ttk.Button(root, text="Stop", command=stop_simulation, style='TButton')
+stop_button.grid(row=12, column=0, columnspan=2, padx=5, pady=20)
+stop_button.grid(row=12, column=1, padx=5, pady=10)
 # Start the main event loop
 root.mainloop()
