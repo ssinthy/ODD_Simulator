@@ -4,12 +4,14 @@ from operating_conditions import init_opcond_from_json
 class Taxonomy:
     SPEED = "SPEED"
     EMERGENCY_VEHICLE = "EMERGENCY_VEHICLE"
-    DISTANCE = "DISTANCE"
+    LON_DISTANCE = "LON_DISTANCE"
+    LAT_DISTANCE = "LAT_DISTANCE"
     EGO_VEHICLE = "EGO_VEHICLE"
     RELATIVE_POSITION = "RELATIVE_POSITION"
 
 class OperationalDesignDomain:
     def __init__(self, odd_json=None):
+        print(odd_json)
         if odd_json is not None:
             self._in_opconditions = [init_opcond_from_json(json_incond) for json_incond in odd_json["conditions"]]
             return

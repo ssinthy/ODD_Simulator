@@ -204,6 +204,7 @@ def monitor_odd():
          # Get the current location of the vehicle
         ego_vehicle_location = global_ego_vehicle.get_location()
         emergency_vehicle_location = global_emv_vehicle.get_location()
+        yaw_ego = global_ego_vehicle.get_transform().rotation.yaw
        
         # Get the road ID and check if it's a junction for ego vehicle
         waypoint_ego = map.get_waypoint(ego_vehicle_location)
@@ -232,7 +233,7 @@ def monitor_odd():
             else:
                 emv_relative_pos = "opposite_lane"
 
-        distance_between_ego_and_emv = calculate_distance(ego_vehicle_location, emergency_vehicle_location)
+        lon_distance, lat_distance = get_lateral_longitudinal_distance(ego_vehicle_location, emergency_vehicle_location, yaw_ego)
 
         # Construct avdata from road info. Include all necessary information in avdata
         avdata = {
@@ -241,15 +242,15 @@ def monitor_odd():
             },
             Taxonomy.EMERGENCY_VEHICLE: {
                 Taxonomy.SPEED: round(emergency_vehicle_velocity, 2),
-                Taxonomy.DISTANCE: round(distance_between_ego_and_emv, 2),
+                Taxonomy.LON_DISTANCE: lon_distance,
+                Taxonomy.LAT_DISTANCE: lat_distance,
                 Taxonomy.RELATIVE_POSITION: emv_relative_pos
             }
         }
 
-        print(avdata)
+        #print(avdata)
 
         # Evaluate the avdata against ODD
-
         is_within_odd = odd.check_within_odd(avdata)
 
         if is_within_odd:

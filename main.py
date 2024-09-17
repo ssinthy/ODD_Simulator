@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import threading
+from odd_monitoring import set_lan_lon_safe_distance
 
 from carla_setup import *
 
@@ -91,10 +92,11 @@ def on_combobox_emv_action_change(event, combobox_name):
     if current_value != scenario_info[combobox_name]:
         scenario_info[combobox_name] = current_value
         
-        
 def start_simulation():
     ego_velocity = int(ego_velocity_sb.get())
     emv_velocity = int(emv_velocity_sb.get())
+
+    set_lan_lon_safe_distance(int(long_safe_distance_sb.get()), int(lat_safe_distance_sb.get()))
     
     threading.Thread(target=monitor_odd).start()
     threading.Thread(target=activate_autopilot, args=[ego_velocity, emv_velocity, scenario_info]).start()
@@ -175,12 +177,12 @@ emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_fon
 emv_velocity_sb.grid(row=9, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)
-emv_long_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
-emv_long_safe_distance_sb.grid(row=10, column=1, padx=20, pady=10)
+long_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
+long_safe_distance_sb.grid(row=10, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=11, column=0, padx=20, pady=10, sticky=tk.W)
-emv_lat_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
-emv_lat_safe_distance_sb.grid(row=11, column=1, padx=20, pady=10)
+lat_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
+lat_safe_distance_sb.grid(row=11, column=1, padx=20, pady=10)
 
 setup_button = ttk.Button(root, text="Setup", command=set_up_simulation, style='TButton')
 setup_button.grid(row=12, column=0, padx=5, pady=20)

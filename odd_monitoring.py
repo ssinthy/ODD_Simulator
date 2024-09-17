@@ -8,16 +8,23 @@ from odd import OperationalDesignDomain, Taxonomy
 
 INFINITY = 1000000000
 odd = OperationalDesignDomain()
+min_lon_safe_distance = 0
+min_lat_safe_distance = 0
 
- # Fetch all ODDs from database and make odd objects
-    # EMV on motoway must maintain a safe distance of 50m
+def set_lan_lon_safe_distance(lon_distance, lat_distance):
+    global min_lon_safe_distance, min_lat_safe_distance
+    min_lon_safe_distance = lon_distance
+    min_lat_safe_distance = lat_distance
+    #  print(min_lon_safe_distance)
+
+
 odd.add_in_operating_condition(OpCondOr(opconds=[OpCondImply(opcond_if=OpCondAnd(
                                                             opconds=[
                                                                 OpCondSet(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.RELATIVE_POSITION], boundset=["subject_lane"]),
                                                                 OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0),
                                                                 OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=1.0, max=INFINITY)
                                                             ]),
-                                                        opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.DISTANCE], min=50, max=INFINITY)
+                                                        opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY)
                                                             ),
                                             OpCondImply(opcond_if=OpCondAnd(
                                                             opconds=[
@@ -25,7 +32,7 @@ odd.add_in_operating_condition(OpCondOr(opconds=[OpCondImply(opcond_if=OpCondAnd
                                                                 OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0),
                                                                 OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=1.0, max=INFINITY)
                                                             ]),
-                                                            opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.DISTANCE], min=5, max=INFINITY),
+                                                            opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY),
                                                             ),
                                             OpCondImply(opcond_if=OpCondAnd(
                                                             opconds=[
@@ -33,7 +40,7 @@ odd.add_in_operating_condition(OpCondOr(opconds=[OpCondImply(opcond_if=OpCondAnd
                                                                 OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=0.0, max=0.0),
                                                                 OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0)
                                                             ]),
-                                                            opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.DISTANCE], min=10, max=INFINITY),
+                                                            opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY),
                                                             ),
                                             OpCondImply(opcond_if=OpCondAnd(
                                                             opconds=[
@@ -41,17 +48,30 @@ odd.add_in_operating_condition(OpCondOr(opconds=[OpCondImply(opcond_if=OpCondAnd
                                                                 OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=0.0, max=0.0),
                                                                 OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0)
                                                             ]),
-                                                            opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.DISTANCE], min=3, max=INFINITY),
+                                                            opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY),
                                                             )
                                             ]))
 
 
-def calculate_distance(ego_vehicle_location, emv_vehicle_location):
+def calculate_euclidean_distance(ego_vehicle_location, emv_vehicle_location):
     """Calculate the Euclidean distance between two locations."""
     dx = ego_vehicle_location.x - emv_vehicle_location.x
     dy = ego_vehicle_location.y - emv_vehicle_location.y
     dz = ego_vehicle_location.z - emv_vehicle_location.z
     return math.sqrt(dx**2 + dy**2 + dz**2)
+
+def get_lateral_longitudinal_distance(ego_vehicle_location, emv_vehicle_location, yaw_ego):
+    yaw_ego_rad = math.radians(yaw_ego)
+
+    # Calculate relative position (difference in x, y coordinates)
+    dx = emv_vehicle_location.x - ego_vehicle_location.x
+    dy = emv_vehicle_location.y - ego_vehicle_location.y
+
+    # Compute longitudinal and lateral distances
+    longitudinal_distance = math.cos(yaw_ego_rad) * dx + math.sin(yaw_ego_rad) * dy
+    lateral_distance = -math.sin(yaw_ego_rad) * dx + math.cos(yaw_ego_rad) * dy
+
+    return lateral_distance, longitudinal_distance
 
 def is_emv_in_same_directional_lane(waypoint1, waypoint2):
     """Check if two waypoints are in the same directional lane based on lane ID sign."""
