@@ -3,9 +3,6 @@ import time
 import math
 import threading
 
-from operating_conditions import OpCondImply, OpCondRange, OpCondSet, OpCondAnd, OpCondOr
-from odd import OperationalDesignDomain, Taxonomy
-
 INFINITY = 1000000
 global_ego_vehicle = None
 global_emv_vehicle = None
@@ -188,85 +185,12 @@ def activate_autopilot(ego_velocity, emv_velocity, scenario_info):
         global_ego_vehicle.apply_control(ego_agent.run_step())
         global_emv_vehicle.apply_control(emv_agent.run_step())
 
-# ODD Monitoring
-def calculate_euclidean_distance(ego_vehicle_location, emv_vehicle_location):
-    """Calculate the Euclidean distance between two locations."""
-    dx = ego_vehicle_location.x - emv_vehicle_location.x
-    dy = ego_vehicle_location.y - emv_vehicle_location.y
-    dz = ego_vehicle_location.z - emv_vehicle_location.z
-    return math.sqrt(dx**2 + dy**2 + dz**2)
-
-def get_lateral_longitudinal_distance(ego_vehicle_location, emv_vehicle_location, yaw_ego):
-    yaw_ego_rad = math.radians(yaw_ego)
-
-    # Calculate relative position (difference in x, y coordinates)
-    dx = emv_vehicle_location.x - ego_vehicle_location.x
-    dy = emv_vehicle_location.y - ego_vehicle_location.y
-
-    # Compute longitudinal and lateral distances
-    longitudinal_distance = math.cos(yaw_ego_rad) * dx + math.sin(yaw_ego_rad) * dy
-    lateral_distance = -math.sin(yaw_ego_rad) * dx + math.cos(yaw_ego_rad) * dy
-
-    return lateral_distance, longitudinal_distance
-
-def is_emv_in_same_directional_lane(waypoint1, waypoint2):
-    """Check if two waypoints are in the same directional lane based on lane ID sign."""
-    return ((waypoint1.lane_id < 0 and waypoint2.lane_id < 0) or
-            (waypoint1.lane_id > 0 and waypoint2.lane_id > 0))
-
-def is_emv_in_on_ego_lane(waypoint1, waypoint2):
-    return waypoint1.lane_id == waypoint2.lane_id
-
-def get_speed(vehicle):
-    velocity = vehicle.get_velocity()
-    # Calculate the magnitude of the velocity vector (speed)
-    speed = math.sqrt(velocity.x**2 + velocity.y**2 + velocity.z**2)
-    # convert speed from m/s to km/h
-    return speed * 3.6
-        
-def monitor_odd(min_lon_safe_distance, min_lat_safe_distance):
+# ODD Monitoring   
+def check_safety_boundary(d_front, d_rear, d_left, d_right):
     global global_emv_vehicle, world, global_ego_vehicle
 
     # Reset the event
     stop_event_odd_monitoring.clear()
-
-    map = world.get_map()
-
-    odd = OperationalDesignDomain()
-
-    odd.add_in_operating_condition(OpCondOr(opconds=[OpCondImply(opcond_if=OpCondAnd(
-                                                                opconds=[
-                                                                    OpCondSet(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.RELATIVE_POSITION], boundset=["subject_lane"]),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=1.0, max=INFINITY)
-                                                                ]),
-                                                            opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY)
-                                                                ),
-                                                OpCondImply(opcond_if=OpCondAnd(
-                                                                opconds=[
-                                                                    OpCondSet(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.RELATIVE_POSITION], boundset=["opposite_lane"]),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=1.0, max=INFINITY)
-                                                                ]),
-                                                                opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY),
-                                                                ),
-                                                OpCondImply(opcond_if=OpCondAnd(
-                                                                opconds=[
-                                                                    OpCondSet(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.RELATIVE_POSITION], boundset=["subject_lane"]),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=0.0, max=0.0),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0)
-                                                                ]),
-                                                                opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY),
-                                                                ),
-                                                OpCondImply(opcond_if=OpCondAnd(
-                                                                opconds=[
-                                                                    OpCondSet(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.RELATIVE_POSITION], boundset=["opposite_lane"]),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.SPEED], min=0.0, max=0.0),
-                                                                    OpCondRange(taxonomies=[Taxonomy.EGO_VEHICLE, Taxonomy.SPEED], min=0.0, max=70.0)
-                                                                ]),
-                                                                opcond_then=OpCondRange(taxonomies=[Taxonomy.EMERGENCY_VEHICLE, Taxonomy.LON_DISTANCE], min=min_lon_safe_distance, max=INFINITY),
-                                                                )
-                                                ]))
 
     while True:
         time.sleep(0.1)
@@ -276,64 +200,31 @@ def monitor_odd(min_lon_safe_distance, min_lat_safe_distance):
             break
 
          # Get the current location of the vehicle
-        ego_vehicle_location = global_ego_vehicle.get_location()
-        emergency_vehicle_location = global_emv_vehicle.get_location()
-        yaw_ego = global_ego_vehicle.get_transform().rotation.yaw
-       
-        # Get the road ID and check if it's a junction for ego vehicle
-        waypoint_ego = map.get_waypoint(ego_vehicle_location)
+        ego_vehicle_transform = global_ego_vehicle.get_transform()
+        ego_location = ego_vehicle_transform.location
+        emergency_vehicle_transform = global_emv_vehicle.get_transform()
+        emv_location = emergency_vehicle_transform.location
 
-        # Get the road ID and check if it's a junction for emv vehicle
-        waypoint_emv = map.get_waypoint(emergency_vehicle_location)
+        dx = emv_location.x - ego_location.x
+        dy = emv_location.y - ego_location.y
 
-        # Get ego vehicle velocity
-        ego_vehicle_velocity = get_speed(global_ego_vehicle)
+        boundary_points = [
+        carla.Location(x=ego_location.x + d_front, y=ego_location.y + d_left),
+        carla.Location(x=ego_location.x - d_rear, y=ego_location.y + d_left),
+        carla.Location(x=ego_location.x - d_rear, y=ego_location.y - d_right),
+        carla.Location(x=ego_location.x + d_front, y=ego_location.y - d_right)
+        ]
+    
+        # Draw lines for the asymmetrical safety boundary
+        world.debug.draw_line(boundary_points[0], boundary_points[1], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)
+        world.debug.draw_line(boundary_points[1], boundary_points[2], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)
+        world.debug.draw_line(boundary_points[2], boundary_points[3], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)
+        world.debug.draw_line(boundary_points[3], boundary_points[0], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)
 
-        # Get emergency vehicle velocity
-        emergency_vehicle_velocity = get_speed(global_emv_vehicle)
+        within_longitudinal_bounds = -d_rear <= dx <= d_front
+        within_lateral_bounds = -d_left <= dy <= d_right
 
-        emv_relative_pos = "on_other_road"
-
-        if waypoint_emv.is_junction:
-            emv_relative_pos = "on_junction"
-
-        if waypoint_ego.road_id == waypoint_emv.road_id:
-            # Check the condition and set lane_type if condition is true
-            if is_emv_in_same_directional_lane(waypoint_ego, waypoint_emv):
-                if is_emv_in_on_ego_lane(waypoint_ego, waypoint_emv):
-                    emv_relative_pos = "subject_lane"
-                else:
-                    emv_relative_pos = "parallel lane"
-            else:
-                emv_relative_pos = "opposite_lane"
-
-        lon_distance, lat_distance = get_lateral_longitudinal_distance(ego_vehicle_location, emergency_vehicle_location, yaw_ego)
-
-        # Construct avdata from road info. Include all necessary information in avdata
-        avdata = {
-            Taxonomy.EGO_VEHICLE: {
-                Taxonomy.SPEED: round(ego_vehicle_velocity, 2)
-            },
-            Taxonomy.EMERGENCY_VEHICLE: {
-                Taxonomy.SPEED: round(emergency_vehicle_velocity, 2),
-                Taxonomy.LON_DISTANCE: lon_distance,
-                Taxonomy.LAT_DISTANCE: lat_distance,
-                Taxonomy.RELATIVE_POSITION: emv_relative_pos
-            }
-        }
-
-        #print(avdata)
-
-        # Evaluate the avdata against ODD
-        is_within_odd = odd.check_within_odd(avdata)
-
-        if is_within_odd:
-            print("Inside ODD")
+        if within_longitudinal_bounds and within_lateral_bounds:
+            print(f"Vehicle detected within safety boundary")
         else:
-            print("Outside ODD")
-            world.debug.draw_string(ego_vehicle_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.1)
-            bbox = global_ego_vehicle.bounding_box
-            bbox.location += global_ego_vehicle.get_transform().location
-
-            # Draw the bounding box
-            world.debug.draw_box(bbox, global_ego_vehicle.get_transform().rotation, thickness=0.1, color=carla.Color(255, 0, 0, 0), life_time=0.1)
+            print(f"Vehicle is outside the safety boundary")
