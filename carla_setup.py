@@ -192,12 +192,8 @@ def rotate_point(x, y, theta):
     return x_rot, y_rot
 
 # Function to draw the safety boundary
-def draw_safety_boundary(ego_vehicle, d_front, d_rear, d_left, d_right):
-    # Get the ego vehicle's current transform (position and rotation)
-    ego_transform = ego_vehicle.get_transform()
-    ego_location = ego_transform.location
-    ego_rotation = ego_transform.rotation
-
+def draw_safety_boundary(ego_location, ego_rotation, status, d_front, d_rear, d_left, d_right):
+    color = carla.Color(0, 255, 0) if status == "in" else carla.Color(255, 0, 0)
     # Ego vehicle heading (in radians)
     yaw = math.radians(ego_rotation.yaw)
 
@@ -220,10 +216,10 @@ def draw_safety_boundary(ego_vehicle, d_front, d_rear, d_left, d_right):
         rotated_corners.append(carla.Location(x=ego_location.x + x_rot, y=ego_location.y + y_rot, z=ego_location.z))
 
     # Draw lines between the rotated corners to form the boundary box
-    world.debug.draw_line(rotated_corners[0], rotated_corners[1], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)  # Front line
-    world.debug.draw_line(rotated_corners[1], rotated_corners[3], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)  # Right line
-    world.debug.draw_line(rotated_corners[3], rotated_corners[2], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)  # Rear line
-    world.debug.draw_line(rotated_corners[2], rotated_corners[0], thickness=0.3, color=carla.Color(0, 255, 0), life_time=0.1)  # Left line
+    world.debug.draw_line(rotated_corners[0], rotated_corners[1], thickness=0.3, color=color, life_time=0.05)  # Front line
+    world.debug.draw_line(rotated_corners[1], rotated_corners[3], thickness=0.3, color=color, life_time=0.05)  # Right line
+    world.debug.draw_line(rotated_corners[3], rotated_corners[2], thickness=0.3, color=color, life_time=0.05)  # Rear line
+    world.debug.draw_line(rotated_corners[2], rotated_corners[0], thickness=0.3, color=color, life_time=0.05)  # Left line
 
 # ODD Monitoring   
 def check_safety_boundary(d_front, d_rear, d_left, d_right):
@@ -234,7 +230,7 @@ def check_safety_boundary(d_front, d_rear, d_left, d_right):
     height = 2.0  
 
     while True:
-        time.sleep(0.1)
+        time.sleep(0.05)
         if global_ego_vehicle is None or global_emv_vehicle is None:
             break   
         if stop_event_odd_monitoring.is_set() or stop_event_simulation.is_set():
@@ -257,6 +253,7 @@ def check_safety_boundary(d_front, d_rear, d_left, d_right):
             # Draw the bounding box in the world for visualization (duration = 0.1 seconds, color = green) out of ODD
             # world.debug.draw_box(bounding_box, ego_rotation, thickness=0.2, color=carla.Color(255, 0, 0, 0), life_time=0.1)
             world.debug.draw_string(ego_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.1)
+            draw_safety_boundary(ego_location, ego_rotation, "out", d_front, d_rear, d_left, d_right)
         else:
             # Draw the bounding box in the world for visualization (duration = 0.1 seconds, color = green)
-            draw_safety_boundary(global_ego_vehicle, d_front, d_rear, d_left, d_right)
+            draw_safety_boundary(ego_location, ego_rotation, "in", d_front, d_rear, d_left, d_right)
