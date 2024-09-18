@@ -216,10 +216,10 @@ def draw_safety_boundary(ego_location, ego_rotation, status, d_front, d_rear, d_
         rotated_corners.append(carla.Location(x=ego_location.x + x_rot, y=ego_location.y + y_rot, z=ego_location.z))
 
     # Draw lines between the rotated corners to form the boundary box
-    world.debug.draw_line(rotated_corners[0], rotated_corners[1], thickness=0.3, color=color, life_time=0.05)  # Front line
-    world.debug.draw_line(rotated_corners[1], rotated_corners[3], thickness=0.3, color=color, life_time=0.05)  # Right line
-    world.debug.draw_line(rotated_corners[3], rotated_corners[2], thickness=0.3, color=color, life_time=0.05)  # Rear line
-    world.debug.draw_line(rotated_corners[2], rotated_corners[0], thickness=0.3, color=color, life_time=0.05)  # Left line
+    world.debug.draw_line(rotated_corners[0], rotated_corners[1], thickness=0.3, color=color, life_time=0.01)  # Front line
+    world.debug.draw_line(rotated_corners[1], rotated_corners[3], thickness=0.3, color=color, life_time=0.01)  # Right line
+    world.debug.draw_line(rotated_corners[3], rotated_corners[2], thickness=0.3, color=color, life_time=0.01)  # Rear line
+    world.debug.draw_line(rotated_corners[2], rotated_corners[0], thickness=0.3, color=color, life_time=0.01)  # Left line
 
 # ODD Monitoring   
 def check_safety_boundary(d_front, d_rear, d_left, d_right):
@@ -230,7 +230,7 @@ def check_safety_boundary(d_front, d_rear, d_left, d_right):
     height = 2.0  
 
     while True:
-        time.sleep(0.05)
+        time.sleep(0.01)
         if global_ego_vehicle is None or global_emv_vehicle is None:
             break   
         if stop_event_odd_monitoring.is_set() or stop_event_simulation.is_set():
@@ -242,17 +242,22 @@ def check_safety_boundary(d_front, d_rear, d_left, d_right):
         emergency_vehicle_transform = global_emv_vehicle.get_transform()
         emv_location = emergency_vehicle_transform.location
         ego_rotation = ego_vehicle_transform.rotation
+        yaw_ego = math.radians(ego_vehicle_transform.rotation.yaw)
 
         dx = emv_location.x - ego_location.x
         dy = emv_location.y - ego_location.y
+        
+        # Rotate the relative position to align with the ego vehicle's orientation (local coordinates)
+        dx_local, dy_local = rotate_point(dx, dy, -yaw_ego)
 
-        within_longitudinal_bounds = -d_rear <= dx <= d_front
-        within_lateral_bounds = -d_left <= dy <= d_right
-
+        # Check if the emergency vehicle is within the longitudinal and lateral safety boundaries
+        within_longitudinal_bounds = (-d_rear <= dx_local <= d_front)  # Check front and rear
+        within_lateral_bounds = (-d_right <= dy_local <= d_left)
+        
         if within_longitudinal_bounds and within_lateral_bounds:
             # Draw the bounding box in the world for visualization (duration = 0.1 seconds, color = green) out of ODD
             # world.debug.draw_box(bounding_box, ego_rotation, thickness=0.2, color=carla.Color(255, 0, 0, 0), life_time=0.1)
-            world.debug.draw_string(ego_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.1)
+            world.debug.draw_string(ego_location, "Out of ODD", draw_shadow=False, color=carla.Color(255,0,0), life_time=0.01)
             draw_safety_boundary(ego_location, ego_rotation, "out", d_front, d_rear, d_left, d_right)
         else:
             # Draw the bounding box in the world for visualization (duration = 0.1 seconds, color = green)
