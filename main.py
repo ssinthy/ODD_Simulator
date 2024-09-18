@@ -94,10 +94,10 @@ def on_combobox_emv_action_change(event, combobox_name):
 def start_simulation():
     ego_velocity = int(ego_velocity_sb.get())
     emv_velocity = int(emv_velocity_sb.get())
-    log_safe_distance = int(long_safe_distance_sb.get())
+    lon_safe_distance = int(long_safe_distance_sb.get())
     lat_safe_distance = int(lat_safe_distance_sb.get())
     
-    threading.Thread(target=check_safety_boundary, args=[10,5,5,1]).start()
+    threading.Thread(target=check_safety_boundary, args=[lon_safe_distance, lat_safe_distance]).start()
     threading.Thread(target=activate_autopilot, args=[ego_velocity, emv_velocity, scenario_info]).start()
     
 # Initialize the main window and GUI setup

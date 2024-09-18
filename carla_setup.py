@@ -222,12 +222,14 @@ def draw_safety_boundary(ego_location, ego_rotation, status, d_front, d_rear, d_
     world.debug.draw_line(rotated_corners[2], rotated_corners[0], thickness=0.5, color=color, life_time=0.01)  # Left line
 
 # ODD Monitoring   
-def check_safety_boundary(d_front, d_rear, d_left, d_right):
+def check_safety_boundary(lon, lat):
     global global_emv_vehicle, world, global_ego_vehicle
-
+    d_front = lon
+    d_rear = lon
+    d_left = lat
+    d_right = lat
     # Reset the event
     stop_event_odd_monitoring.clear()
-    height = 2.0  
 
     while True:
         time.sleep(0.01)
