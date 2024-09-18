@@ -216,10 +216,10 @@ def draw_safety_boundary(ego_location, ego_rotation, status, d_front, d_rear, d_
         rotated_corners.append(carla.Location(x=ego_location.x + x_rot, y=ego_location.y + y_rot, z=ego_location.z))
 
     # Draw lines between the rotated corners to form the boundary box
-    world.debug.draw_line(rotated_corners[0], rotated_corners[1], thickness=0.3, color=color, life_time=0.01)  # Front line
-    world.debug.draw_line(rotated_corners[1], rotated_corners[3], thickness=0.3, color=color, life_time=0.01)  # Right line
-    world.debug.draw_line(rotated_corners[3], rotated_corners[2], thickness=0.3, color=color, life_time=0.01)  # Rear line
-    world.debug.draw_line(rotated_corners[2], rotated_corners[0], thickness=0.3, color=color, life_time=0.01)  # Left line
+    world.debug.draw_line(rotated_corners[0], rotated_corners[1], thickness=0.5, color=color, life_time=0.01)  # Front line
+    world.debug.draw_line(rotated_corners[1], rotated_corners[3], thickness=0.5, color=color, life_time=0.01)  # Right line
+    world.debug.draw_line(rotated_corners[3], rotated_corners[2], thickness=0.5, color=color, life_time=0.01)  # Rear line
+    world.debug.draw_line(rotated_corners[2], rotated_corners[0], thickness=0.5, color=color, life_time=0.01)  # Left line
 
 # ODD Monitoring   
 def check_safety_boundary(d_front, d_rear, d_left, d_right):
