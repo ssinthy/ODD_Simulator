@@ -7,6 +7,8 @@ from carla_setup import *
 # Default values for each field
 default_values = {
     "road_type": "Motorway",
+    "weather_condition": "No Rain",
+    "time_of_day": "Day",
     "ego_vehicle_position": "Traffic Lane",
     "emv_position": "Ego Lane",
     "emv_direction": "Approaches from Behind",
@@ -18,7 +20,9 @@ default_values = {
 scenario_info = default_values.copy()
 
 # Define the options for each combobox
-road_type_options = ["Motorway"]
+road_type_options = ["Motorway", "Express Way", "Local Road"]
+weather_condition_options = ["No Rain", "Light Rain", "Moderate Rain", "Heavy Rain"]
+time_of_day_options = ["Day", "Night"]
 ego_vehicle_position_options = ["Traffic Lane", "Approaching Intersection"]
 emv_position_options = ["Ego Lane", "Parallel Lane", "Opposite Lane", "Cross Road", "Approaches Intersection", "Parked"]
 emv_direction_options = ["Approaches from Behind", "As Lead Vehicle"]
@@ -114,10 +118,10 @@ style.configure('TButton', font=large_font)
 
 # Create a Frame to hold the buttons
 button_frame_ev = tk.Frame(root)
-button_frame_ev.grid(row=4, column=1, padx=10, pady=10)
+button_frame_ev.grid(row=6, column=1, padx=10, pady=10)
 
 button_frame_emv = tk.Frame(root)
-button_frame_emv.grid(row=5, column=1, padx=10, pady=10)
+button_frame_emv.grid(row=7, column=1, padx=10, pady=10)
 
 # Create and place the widgets
 ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20, pady=10, sticky=tk.W)
@@ -125,72 +129,84 @@ road_type_cb = ttk.Combobox(root, values=road_type_options, state="readonly", fo
 road_type_cb.set(default_values["road_type"])
 road_type_cb.grid(row=0, column=1, padx=20, pady=10)
 
-ttk.Label(root, text="Ego Vehicle Position", font=large_font).grid(row=1, column=0, padx=20, pady=10, sticky=tk.W)
+# Create and place the widgets
+ttk.Label(root, text="Weather Condition", font=large_font).grid(row=1, column=0, padx=20, pady=10, sticky=tk.W)
+weather_condition_cb = ttk.Combobox(root, values=weather_condition_options, state="readonly", font=large_font)
+weather_condition_cb.set(default_values["weather_condition"])
+weather_condition_cb.grid(row=1, column=1, padx=20, pady=10)
+
+# Create and place the widgets
+ttk.Label(root, text="Time of Day", font=large_font).grid(row=2, column=0, padx=20, pady=10, sticky=tk.W)
+time_of_day_cb = ttk.Combobox(root, values=time_of_day_options, state="readonly", font=large_font)
+time_of_day_cb.set(default_values["time_of_day"])
+time_of_day_cb.grid(row=2, column=1, padx=20, pady=10)
+
+ttk.Label(root, text="Ego Vehicle Position", font=large_font).grid(row=3, column=0, padx=20, pady=10, sticky=tk.W)
 ego_vehicle_position_cb = ttk.Combobox(root, values=ego_vehicle_position_options, state="readonly", font=large_font)
 ego_vehicle_position_cb.set(default_values["ego_vehicle_position"])
-ego_vehicle_position_cb.grid(row=1, column=1, padx=20, pady=10)
+ego_vehicle_position_cb.grid(row=3, column=1, padx=20, pady=10)
 ego_vehicle_position_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_ego_position_change(event, "ego_vehicle_position"))
 
-ttk.Label(root, text="Emergency Vehicle Position", font=large_font).grid(row=2, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Emergency Vehicle Position", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
 emv_position_cb = ttk.Combobox(root, values=emv_position_options, state="readonly", font=large_font)
 emv_position_cb.set(default_values["emv_position"])
-emv_position_cb.grid(row=2, column=1, padx=20, pady=10)
+emv_position_cb.grid(row=4, column=1, padx=20, pady=10)
 emv_position_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_position_change(event, "emv_position"))
 
-ttk.Label(root, text="Emergency Vehicle Role", font=large_font).grid(row=3, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Emergency Vehicle Role", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
 emv_direction_cb = ttk.Combobox(root, values=emv_direction_options, state="readonly", font=large_font)
 emv_direction_cb.set(default_values["emv_direction"])
-emv_direction_cb.grid(row=3, column=1, padx=20, pady=10)
+emv_direction_cb.grid(row=5, column=1, padx=20, pady=10)
 emv_direction_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_direction_change(event, "emv_direction"))
 
-ttk.Label(root, text="Change EV Position", font=large_font).grid(row=4, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Change EV Position", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
 change_ev_position_btn = ttk.Button(button_frame_ev, text="Move +5m", command=lambda: change_vehicle_position(5, "ego", "forward"), style='TButton')
 change_ev_position_bw_btn = ttk.Button(button_frame_ev, text="Move -5m", command=lambda: change_vehicle_position(5, "ego", "backward"), style='TButton')
 change_ev_position_btn.pack(side='left', padx=1)
 change_ev_position_bw_btn.pack(side='left', padx=1)
 
-ttk.Label(root, text="Change EMV Position", font=large_font).grid(row=5, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Change EMV Position", font=large_font).grid(row=7, column=0, padx=20, pady=10, sticky=tk.W)
 change_emv_position_btn = ttk.Button(button_frame_emv, text="Move +5m", command=lambda: change_vehicle_position(5, "emv", "forward"), style='TButton')
 change_emv_position_bw_btn = ttk.Button(button_frame_emv, text="Move -5m", command=lambda: change_vehicle_position(5, "emv", "backward"), style='TButton')
 change_emv_position_btn.pack(side='left', padx=1)
 change_emv_position_bw_btn.pack(side='left', padx=1)
 
-ttk.Label(root, text="EV Travel Direction", font=large_font).grid(row=6, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="EV Travel Direction", font=large_font).grid(row=8, column=0, padx=20, pady=10, sticky=tk.W)
 ego_action_cb = ttk.Combobox(root, values=ev_action, state="readonly", font=large_font)
 ego_action_cb.set(default_values["ev_action"])
-ego_action_cb.grid(row=6, column=1, padx=20, pady=10)
+ego_action_cb.grid(row=8, column=1, padx=20, pady=10)
 ego_action_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_ev_action_change(event, "ev_action"))
 
-ttk.Label(root, text="EMV Travel Direction", font=large_font).grid(row=7, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="EMV Travel Direction", font=large_font).grid(row=9, column=0, padx=20, pady=10, sticky=tk.W)
 emv_action_cb = ttk.Combobox(root, values=emv_action, state="readonly", font=large_font)
 emv_action_cb.set(default_values["emv_action"])
-emv_action_cb.grid(row=7, column=1, padx=20, pady=10)
+emv_action_cb.grid(row=9, column=1, padx=20, pady=10)
 emv_action_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_action_change(event, "emv_action"))
 
-ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=8, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)
 ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
-ego_velocity_sb.grid(row=8, column=1, padx=20, pady=10)
+ego_velocity_sb.grid(row=10, column=1, padx=20, pady=10)
 
-ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=9, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=11, column=0, padx=20, pady=10, sticky=tk.W)
 emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
-emv_velocity_sb.grid(row=9, column=1, padx=20, pady=10)
+emv_velocity_sb.grid(row=11, column=1, padx=20, pady=10)
 
-ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=12, column=0, padx=20, pady=10, sticky=tk.W)
 long_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
-long_safe_distance_sb.grid(row=10, column=1, padx=20, pady=10)
+long_safe_distance_sb.grid(row=12, column=1, padx=20, pady=10)
 
-ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=11, column=0, padx=20, pady=10, sticky=tk.W)
+ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=13, column=0, padx=20, pady=10, sticky=tk.W)
 lat_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
-lat_safe_distance_sb.grid(row=11, column=1, padx=20, pady=10)
+lat_safe_distance_sb.grid(row=13, column=1, padx=20, pady=10)
 
 setup_button = ttk.Button(root, text="Setup", command=set_up_simulation, style='TButton')
-setup_button.grid(row=12, column=0, padx=5, pady=20)
+setup_button.grid(row=14, column=0, padx=5, pady=20)
 
 start_button = ttk.Button(root, text="Start", command=start_simulation, style='TButton')
-start_button.grid(row=12, column=0, columnspan=2, padx=5, pady=20)
+start_button.grid(row=14, column=0, columnspan=2, padx=5, pady=20)
 
 stop_button = ttk.Button(root, text="Stop", command=stop_simulation, style='TButton')
-stop_button.grid(row=12, column=0, columnspan=2, padx=5, pady=20)
-stop_button.grid(row=12, column=1, padx=5, pady=10)
+stop_button.grid(row=14, column=0, columnspan=2, padx=5, pady=20)
+stop_button.grid(row=14, column=1, padx=5, pady=10)
 # Start the main event loop
 root.mainloop()
