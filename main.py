@@ -104,6 +104,54 @@ def start_simulation():
     threading.Thread(target=check_safety_boundary, args=[lon_safe_distance, lat_safe_distance]).start()
     threading.Thread(target=activate_autopilot, args=[ego_velocity, emv_velocity, scenario_info]).start()
     
+def calculate_rss_safe_distance(v_ego_kmh, v_emv_kmh, t_response=1.0, a_ego_min=4.0, a_emv_max=8.0):
+    """
+    Calculate the RSS safe longitudinal distance between an AV and an EMV.
+
+    Parameters:
+    - v_ego_kmh (float): Velocity of the AV in km/h.
+    - v_emv_kmh (float): Velocity of the EMV in km/h.
+    - t_response (float): Response time of the AV in seconds (default is 1.0 s).
+    - a_ego_min (float): Minimum comfortable deceleration of the AV in m/s² (default is 4.0 m/s²).
+    - a_emv_max (float): Maximum braking deceleration of the EMV in m/s² (default is 8.0 m/s²).
+
+    Returns:
+    - float: The RSS safe longitudinal distance in meters.
+    """
+    # Convert velocities from km/h to m/s
+    v_ego = v_ego_kmh * 1000 / 3600
+    v_emv = v_emv_kmh * 1000 / 3600
+
+    # Calculate the first term: v_ego * t_response
+    d1 = v_ego * t_response
+
+    # Calculate the second term: (v_ego)^2 / (2 * a_ego_min)
+    d2 = (v_ego ** 2) / (2 * a_ego_min)
+
+    # Calculate the third term: (v_emv)^2 / (2 * a_emv_max)
+    d3 = (v_emv ** 2) / (2 * a_emv_max)
+
+    # Compute the safe distance
+    d_safe = d1 + d2 - d3
+
+    return d_safe + 20
+
+def update_safe_distance(*args):
+    try:
+        # Get the velocities from the Spinboxes
+        v_ego_kmh = float(ego_speed_var.get())
+        v_emv_kmh = float(emv_speed_var.get())
+
+        # Calculate the safe distance
+        safe_distance = calculate_rss_safe_distance(v_ego_kmh, v_emv_kmh)
+
+        # Update the safe distance Spinbox
+        safe_distance_var.set(f"{safe_distance:.2f}")
+    except ValueError:
+        # Handle the case where the input is not a valid float
+        safe_distance_var.set("Invalid input")
+        
+            
 # Initialize the main window and GUI setup
 root = tk.Tk()
 root.title("ScenarioInfoManager")
@@ -122,6 +170,11 @@ button_frame_ev.grid(row=6, column=1, padx=10, pady=10)
 
 button_frame_emv = tk.Frame(root)
 button_frame_emv.grid(row=7, column=1, padx=10, pady=10)
+
+# Variables to hold the values
+ego_speed_var = tk.StringVar(value="50")
+emv_speed_var = tk.StringVar(value="60")
+safe_distance_var = tk.StringVar()
 
 # Create and place the widgets
 ttk.Label(root, text="Road Type", font=large_font).grid(row=0, column=0, padx=20, pady=10, sticky=tk.W)
@@ -184,15 +237,15 @@ emv_action_cb.grid(row=9, column=1, padx=20, pady=10)
 emv_action_cb.bind("<<ComboboxSelected>>", lambda event: on_combobox_emv_action_change(event, "emv_action"))
 
 ttk.Label(root, text="Set Ego Velocity (km/h)", font=large_font).grid(row=10, column=0, padx=20, pady=10, sticky=tk.W)
-ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
+ego_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, textvariable=ego_speed_var, font=large_font)
 ego_velocity_sb.grid(row=10, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Set EMV Velocity (km/h)", font=large_font).grid(row=11, column=0, padx=20, pady=10, sticky=tk.W)
-emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, font=large_font)
+emv_velocity_sb = tk.Spinbox(root, from_=0, to=100, increment=10, textvariable=emv_speed_var, font=large_font)
 emv_velocity_sb.grid(row=11, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Longitudinal Distance (m)", font=large_font).grid(row=12, column=0, padx=20, pady=10, sticky=tk.W)
-long_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, font=large_font)
+long_safe_distance_sb = tk.Spinbox(root, from_=0, to=200, increment=1, textvariable=safe_distance_var, font=large_font)
 long_safe_distance_sb.grid(row=12, column=1, padx=20, pady=10)
 
 ttk.Label(root, text="Safe Lateral Distance (m)", font=large_font).grid(row=13, column=0, padx=20, pady=10, sticky=tk.W)
@@ -208,5 +261,13 @@ start_button.grid(row=14, column=0, columnspan=2, padx=5, pady=20)
 stop_button = ttk.Button(root, text="Stop", command=stop_simulation, style='TButton')
 stop_button.grid(row=14, column=0, columnspan=2, padx=5, pady=20)
 stop_button.grid(row=14, column=1, padx=5, pady=10)
+
+# Bind the update function to changes in the Spinboxes
+ego_speed_var.trace_add('write', update_safe_distance)
+emv_speed_var.trace_add('write', update_safe_distance)
+
+# Initialize the safe distance
+update_safe_distance()
+
 # Start the main event loop
 root.mainloop()
